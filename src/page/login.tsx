@@ -76,17 +76,14 @@ export default function LoginPage() {
                   <Box className={`
                     bg-gray-50 dark:bg-slate-900 
                     border ${errors.email ? 'border-red-400' : isEmailValid ? 'border-green-400' : 'border-gray-100 dark:border-slate-800'} 
-                    rounded-2xl px-4 py-3
+                    rounded-2xl px-4 py-4
                   `}>
-                    <Text className="text-xs text-gray-400 dark:text-slate-500 font-medium ml-1 mb-0.5">
-                      Email or Mobile number
-                    </Text>
                     
                     <HStack className="items-center justify-between">
                       <Input className="h-7 flex-1 p-0 border-0 border-transparent">
                         <InputField
                           className="font-bold text-base text-gray-800 dark:text-white p-0 leading-tight"
-                          placeholder="john@example.com"
+                          placeholder="Email"
                           placeholderTextColor={colorScheme === 'dark' ? '#334155' : '#e2e8f0'}
                           value={value}
                           onChangeText={onChange}
@@ -119,17 +116,14 @@ export default function LoginPage() {
                   <Box className={`
                     bg-gray-50 dark:bg-slate-900 
                     border ${errors.password ? 'border-red-400' : 'border-gray-100 dark:border-slate-800'} 
-                    rounded-2xl px-4 py-3
+                    rounded-2xl px-4 py-4
                   `}>
-                    <Text className="text-xs text-gray-400 dark:text-slate-500 font-medium ml-1 mb-0.5">
-                      Password
-                    </Text>
 
                     <HStack className="items-center justify-between">
                       <Input className="h-7 flex-1 p-0 border-0 border-transparent">
                         <InputField
                           className="font-bold text-base text-gray-800 dark:text-white p-0 leading-tight"
-                          placeholder="••••••••"
+                          placeholder="Password"
                           placeholderTextColor={colorScheme === 'dark' ? '#334155' : '#e2e8f0'}
                           value={value}
                           onChangeText={onChange}

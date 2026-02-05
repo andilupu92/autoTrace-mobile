@@ -15,10 +15,12 @@ const THEMES = {
   light: {
     cardColor: '#F0A83A',
     iconColor: '#FDB022',
+    backIconColor: '#f8f6f6',
   },
   dark: {
     cardColor: '#2D3748',
     iconColor: '#E2E8F0',
+    backIconColor: '#2D3748',
   },
 };
 
@@ -75,12 +77,6 @@ export default function WelcomeCard() {
         {/* Card background */}
         <Path d={cardPath} fill={theme.cardColor} />
 
-        {/* Highlight */}
-        {/*<Path
-          d={`M ${r} 0 L ${W - r} 0 A ${r} ${r} 0 0 1 ${W} ${r} L ${W} 80 L 0 80 L 0 ${r} A ${r} ${r} 0 0 1 ${r} 0 Z`}
-          fill="rgba(255,255,255,0.08)"
-        />*/}
-
         {/* Text */}
         <SvgText
           x={32}
@@ -117,7 +113,7 @@ export default function WelcomeCard() {
           cx={iconX}
           cy={iconY}
           r={iconRadius}
-          fill="#F9FAFB"
+          fill={theme.backIconColor}
           opacity={0.95}
         />
 
@@ -145,13 +141,22 @@ export default function WelcomeCard() {
             })}
           </G>
         ) : (
-          // Moon
-          <Path
-            d={`M ${iconX - 6} ${iconY - 10} 
-                A 12 12 0 1 0 ${iconX - 6} ${iconY + 10} 
-                A 9 9 0 1 1 ${iconX - 6} ${iconY - 10} Z`}
-            fill={theme.iconColor}
-          />
+          // Moon with stars - simpler version
+          <G>
+            {/* Moon - bigger */}
+            <Path
+              d={`M ${iconX + 5} ${iconY - 14} 
+                  A 16 16 0 1 0 ${iconX + 5} ${iconY + 14} 
+                  A 12 12 0 1 1 ${iconX + 5} ${iconY - 14} Z`}
+              fill={theme.iconColor}
+            />
+            
+            {/* Star 1 - using small circle */}
+            <Circle cx={iconX + 15} cy={iconY - 7} r={2} fill={theme.iconColor} opacity={0.9} />
+            
+            {/* Star 2 - smaller */}
+            <Circle cx={iconX + 7} cy={iconY + 10} r={1.5} fill={theme.iconColor} opacity={0.8} />
+          </G>
         )}
       </Svg>
 
