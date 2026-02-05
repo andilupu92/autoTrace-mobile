@@ -17,6 +17,7 @@ import {
   FormControlErrorText
 } from '@/components/ui/form-control';
 import { EyeIcon, EyeOffIcon, CheckCircleIcon } from "lucide-react-native";
+import { AntDesign, FontAwesome } from '@expo/vector-icons';
 import WelcomeCard from "./WelcomeCard";
 
 const loginSchema = z.object({
@@ -60,7 +61,7 @@ export default function LoginPage() {
       >
 
         <VStack 
-          className="flex-1 px-8 pt-12 mt-16 bg-white dark:bg-slate-950 rounded-t-[35px]"
+          className="flex-1 px-8 pt-12 mt-12 bg-white dark:bg-slate-950 rounded-t-[35px]"
           style={{ zIndex: 20 }}
         >
           
@@ -174,6 +175,48 @@ export default function LoginPage() {
                 Sign In
               </ButtonText>
             </Button>
+
+            <HStack className="items-center my-8">
+              <Box className="flex-1 h-[1px] bg-gray-200 dark:bg-slate-800" />
+                <Text className="px-4 text-gray-400 dark:text-slate-500 text-sm font-medium">
+                  or continue with
+                </Text>
+              <Box className="flex-1 h-[1px] bg-gray-200 dark:bg-slate-800" />
+            </HStack>
+
+            {/* Social Login Buttons Container */}
+            <HStack className="justify-center mt-6" space="lg">
+              
+              {/* Google Button */}
+              <TouchableOpacity 
+                className="w-16 h-16 items-center justify-center border border-gray-200 dark:border-slate-800 rounded-full bg-white dark:bg-slate-900 shadow-sm"
+                onPress={() => console.log('Google')}
+              >
+                <AntDesign name="google" size={28} color="#EB4335" /> 
+              </TouchableOpacity>
+
+              {/* Facebook Button */}
+              <TouchableOpacity 
+                className="w-16 h-16 items-center justify-center border border-gray-200 dark:border-slate-800 rounded-full bg-white dark:bg-slate-900 shadow-sm"
+                onPress={() => console.log('Facebook')}
+              >
+                <FontAwesome name="facebook" size={28} color="#1877F2" />
+              </TouchableOpacity>
+
+              {/* Apple Button - Condiționat pentru iOS 
+              {Platform.OS === 'ios' && (
+                <TouchableOpacity 
+                  className="w-16 h-16 items-center justify-center border border-gray-200 dark:border-slate-800 rounded-full bg-white dark:bg-slate-900 shadow-sm"
+                  onPress={() => console.log('Apple')}
+                >
+                  <AntDesign 
+                    name="apple1" 
+                    size={28} 
+                    color={useColorScheme().colorScheme === 'dark' ? 'white' : 'black'} 
+                  />
+                </TouchableOpacity>
+              )}*/}
+            </HStack>
 
             {/* Footer Links */}
             <HStack className="justify-center mt-8 items-center" space="xs">
