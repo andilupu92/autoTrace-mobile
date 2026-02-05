@@ -117,7 +117,7 @@ export default function WelcomeCard() {
           cx={iconX}
           cy={iconY}
           r={iconRadius}
-          fill="#FFFFFF"
+          fill="#F9FAFB"
           opacity={0.95}
         />
 
