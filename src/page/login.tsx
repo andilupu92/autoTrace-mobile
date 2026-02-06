@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, TouchableOpacity, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
 import { useColorScheme } from "nativewind";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
@@ -10,7 +10,6 @@ import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
 import { Link, LinkText } from '@/components/ui/link';
 import { Button, ButtonText } from '@/components/ui/button';
-import { Input, InputField } from '@/components/ui/input';
 import { 
   FormControl,
   FormControlError, 
@@ -20,6 +19,9 @@ import { EyeIcon, EyeOffIcon, CheckCircleIcon } from "lucide-react-native";
 import { AntDesign, FontAwesome } from '@expo/vector-icons';
 import WelcomeCard from "./WelcomeCard";
 import FloatingInput from '@/components/ui/floating-input';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/AppNavigator';
 
 const loginSchema = z.object({
   email: z.string().min(1, "Email is required").regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please enter a valid email address"),
@@ -28,9 +30,10 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
-export default function LoginPage() {
+export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const { colorScheme } = useColorScheme();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const { control, handleSubmit, formState: { errors, dirtyFields }, watch } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -43,6 +46,8 @@ export default function LoginPage() {
 
   const onSubmit = (data: LoginFormData) => {
     console.log("Login with email:", data.email);
+
+    navigation.navigate('Home');
   };
 
   const iconColor = colorScheme === 'dark' ? '#94a3b8' : '#9ca3af';
@@ -139,7 +144,7 @@ export default function LoginPage() {
 
             {/* Forgot Password Link */}
             <Box className="items-end mb-8 mr-1"> 
-              <Link>
+              <Link onPress={() => navigation.navigate('ForgotPassword')}>
                 <LinkText className="text-sm text-blue-500 dark:text-blue-400 font-medium no-underline">
                   Forgot your password?
                 </LinkText>
@@ -204,7 +209,7 @@ export default function LoginPage() {
               <Text className="text-gray-500 dark:text-slate-500 font-medium">
                 Don't have an account?
               </Text>
-              <Link>
+              <Link onPress={() => navigation.navigate('SignUp')}>
                 <LinkText className="text-blue-600 dark:text-blue-400 font-bold no-underline">
                   Sign up
                 </LinkText>
