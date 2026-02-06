@@ -19,6 +19,7 @@ import {
 import { EyeIcon, EyeOffIcon, CheckCircleIcon } from "lucide-react-native";
 import { AntDesign, FontAwesome } from '@expo/vector-icons';
 import WelcomeCard from "./WelcomeCard";
+import FloatingInput from '@/components/ui/floating-input';
 
 const loginSchema = z.object({
   email: z.string().min(1, "Email is required").regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please enter a valid email address"),
@@ -73,31 +74,24 @@ export default function LoginPage() {
                 control={control}
                 name="email"
                 render={({ field: { onChange, value, onBlur } }) => (
-                  <Box className={`
-                    bg-gray-50 dark:bg-slate-900 
-                    border ${errors.email ? 'border-red-400' : isEmailValid ? 'border-green-400' : 'border-gray-100 dark:border-slate-800'} 
-                    rounded-2xl px-4 py-4
-                  `}>
-                    
-                    <HStack className="items-center justify-between">
-                      <Input className="h-7 flex-1 p-0 border-0 border-transparent">
-                        <InputField
-                          className="font-bold text-base text-gray-800 dark:text-white p-0 leading-tight"
-                          placeholder="Email"
-                          placeholderTextColor={colorScheme === 'dark' ? '#334155' : '#e2e8f0'}
-                          value={value}
-                          onChangeText={onChange}
-                          onBlur={onBlur}
-                          keyboardType="email-address"
-                          autoCapitalize="none"
+                  <FloatingInput
+                    label="Email"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    isInvalid={!!errors.email}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    rightIcon={
+                      isEmailValid ? (
+                        <CheckCircleIcon 
+                          size={20} 
+                          color={activeIconColor} 
+                          fill={colorScheme === 'dark' ? 'rgba(16, 185, 129, 0.2)' : '#d1fae5'} 
                         />
-                      </Input>
-                      
-                      {isEmailValid && (
-                        <CheckCircleIcon size={20} color={activeIconColor} fill={colorScheme === 'dark' ? 'rgba(16, 185, 129, 0.2)' : '#d1fae5'} />
-                      )}
-                    </HStack>
-                  </Box>
+                      ) : null
+                    }
+                  />
                 )}
               />
               <FormControlError>
@@ -108,39 +102,32 @@ export default function LoginPage() {
             </FormControl>
 
             {/* --- PASSWORD INPUT --- */}
-            <FormControl isInvalid={!!errors.password} className="mb-2">
+            <FormControl isInvalid={!!errors.password} className="mb-5">
               <Controller
                 control={control}
                 name="password"
                 render={({ field: { onChange, value, onBlur } }) => (
-                  <Box className={`
-                    bg-gray-50 dark:bg-slate-900 
-                    border ${errors.password ? 'border-red-400' : 'border-gray-100 dark:border-slate-800'} 
-                    rounded-2xl px-4 py-4
-                  `}>
-
-                    <HStack className="items-center justify-between">
-                      <Input className="h-7 flex-1 p-0 border-0 border-transparent">
-                        <InputField
-                          className="font-bold text-base text-gray-800 dark:text-white p-0 leading-tight"
-                          placeholder="Password"
-                          placeholderTextColor={colorScheme === 'dark' ? '#334155' : '#e2e8f0'}
-                          value={value}
-                          onChangeText={onChange}
-                          onBlur={onBlur}
-                          secureTextEntry={!showPassword}
-                        />
-                      </Input>
-
-                      <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                  <FloatingInput
+                    label="Password"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    isInvalid={!!errors.password}
+                    secureTextEntry={!showPassword}
+                    autoCapitalize="none"
+                    rightIcon={
+                      <TouchableOpacity 
+                        onPress={() => setShowPassword(!showPassword)}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      >
                         {showPassword ? (
-                          <EyeOffIcon color={iconColor} size={20} />
+                          <EyeIcon size={20} color={iconColor} />
                         ) : (
-                          <EyeIcon color={iconColor} size={20} />
+                          <EyeOffIcon size={20} color={iconColor} />
                         )}
                       </TouchableOpacity>
-                    </HStack>
-                  </Box>
+                    }
+                  />
                 )}
               />
               <FormControlError>
