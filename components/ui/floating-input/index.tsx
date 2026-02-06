@@ -99,6 +99,7 @@ export default function FloatingInput({
           color: getLabelColor(),
           backgroundColor: getLabelBackgroundColor(),
           paddingHorizontal: 4,
+          borderRadius: 4,
           zIndex: 10,
         }}
       >

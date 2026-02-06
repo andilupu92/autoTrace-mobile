@@ -2,6 +2,15 @@ import React, { useRef } from 'react';
 import { View, Dimensions, TouchableOpacity, Animated } from 'react-native';
 import Svg, { Defs, ClipPath, Path, Text as SvgText, Circle, G } from 'react-native-svg';
 import { useColorScheme } from 'nativewind';
+import { Ionicons } from '@expo/vector-icons';
+
+interface WelcomeCardProps {
+  primaryTitle: string;
+  secondaryTitle: string;
+  contain: string;
+  showBackButton?: boolean;
+  onBackPress?: () => void;
+}
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -16,11 +25,15 @@ const THEMES = {
     cardColor: '#F0A83A',
     iconColor: '#FDB022',
     backIconColor: '#f8f6f6',
+    backButtonBg: 'rgba(255, 255, 255, 0.3)',
+    backArrowColor: '#FFFFFF',
   },
   dark: {
     cardColor: '#2D3748',
     iconColor: '#E2E8F0',
     backIconColor: '#2D3748',
+    backButtonBg: 'rgba(255, 255, 255, 0.15)',
+    backArrowColor: '#E2E8F0',
   },
 };
 
@@ -37,7 +50,7 @@ const cardPath = [
   'Z',
 ].join(' ');
 
-export default function WelcomeCard() {
+export default function WelcomeCard({primaryTitle, secondaryTitle, contain, showBackButton, onBackPress}: WelcomeCardProps) {
   const { colorScheme, toggleColorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
   const rotateAnim = useRef(new Animated.Value(0)).current;
@@ -65,6 +78,11 @@ export default function WelcomeCard() {
   const iconY = H - curveR * 0.35;
   const iconRadius = 32;
 
+  // Back button position
+  const backButtonX = 45;
+  const backButtonY = 80;
+  const backButtonRadius = 22;
+
   return (
     <View style={{ width: '100%' }}>
       <Svg width={W} height={H} pointerEvents="none" viewBox={`0 0 ${W} ${H}`}>
@@ -80,32 +98,32 @@ export default function WelcomeCard() {
         {/* Text */}
         <SvgText
           x={32}
-          y={130}
-          fontSize={38}
+          y={150}
+          fontSize={35}
           fontWeight="700"
           fill="#FFFFFF"
           letterSpacing={-0.5}
         >
-          Welcome
+          {primaryTitle}
         </SvgText>
         <SvgText
           x={32}
-          y={170}
-          fontSize={38}
+          y={190}
+          fontSize={35}
           fontWeight="700"
           fill="#FFFFFF"
           letterSpacing={-0.5}
         >
-          Back
+          {secondaryTitle}
         </SvgText>
 
         <SvgText
           x={32}
-          y={215}
+          y={235}
           fontSize={14}
           fill="rgba(255,255,255,0.87)"
         >
-          Please sign in to continue
+          {contain}
         </SvgText>
 
         {/* White circle for icon */}
@@ -160,6 +178,32 @@ export default function WelcomeCard() {
         )}
       </Svg>
 
+      {/* Back button with icon - positioned outside SVG */}
+        {showBackButton && onBackPress && (
+          <TouchableOpacity
+            onPress={onBackPress}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            style={{
+              position: 'absolute',
+              left: backButtonX - backButtonRadius,
+              top: backButtonY - backButtonRadius,
+              width: backButtonRadius * 2,
+              height: backButtonRadius * 2,
+              borderRadius: backButtonRadius,
+              justifyContent: 'center',
+              alignItems: 'center',
+              zIndex: 99,
+            }}
+            activeOpacity={0.7}
+          >
+            <Ionicons 
+              name="arrow-back-circle-sharp" 
+              size={32} 
+              color={theme.backArrowColor} 
+            />
+          </TouchableOpacity>
+        )}
+
       {/* TouchableOpacity over the circle for toggle */}
       <Animated.View
         style={{
@@ -172,6 +216,7 @@ export default function WelcomeCard() {
           transform: [{ rotate: rotation }],
         }}
       >
+        
         <TouchableOpacity
           onPress={handleToggle}
           hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}

@@ -58,7 +58,10 @@ export default function LoginScreen() {
       
       {/* HEADER */}
       <Box style={{ zIndex: 10 }}>
-        <WelcomeCard />
+        <WelcomeCard primaryTitle="Welcome" 
+                     secondaryTitle="Back" 
+                     contain="Please sign in to continue"
+                     showBackButton={false} />
       </Box>
 
       <KeyboardAvoidingView
