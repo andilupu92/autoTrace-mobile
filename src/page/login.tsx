@@ -22,6 +22,7 @@ import FloatingInput from '@/components/ui/floating-input';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { loginUser } from "../api/services/authService";
 
 const loginSchema = z.object({
   email: z.string().min(1, "Email is required").regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please enter a valid email address"),
@@ -44,10 +45,19 @@ export default function LoginScreen() {
   const emailValue = watch("email");
   const isEmailValid = !errors.email && dirtyFields.email && emailValue.length > 0;
 
-  const onSubmit = (data: LoginFormData) => {
-    console.log("Login with email:", data.email);
+  const onSubmit = async (data: LoginFormData) => {
+    try {
+      console.log("Attempting login...");
 
-    navigation.navigate('Home');
+      // Call the separated API function
+      await loginUser(data.email, data.password);
+
+      console.log("Login Success for: ", data.email);
+      navigation.navigate('Home');
+
+    } catch (error) {
+      console.error("Login Failed:", error);
+    }
   };
 
   const iconColor = colorScheme === 'dark' ? '#94a3b8' : '#9ca3af';
