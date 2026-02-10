@@ -7,16 +7,22 @@ import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import '@/global.css';
 import { useEffect } from "react";
+import { useAuthStore } from "./src/store/authStore";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
   const { colorScheme } = useColorScheme();
+  const initialize = useAuthStore((state) => state.initialize);
 
   const [fontsLoaded] = useFonts({
     'Inter-SemiBold': require('./assets/fonts/Inter_18pt-SemiBold.ttf'),
     'Inter-Italic': require('./assets/fonts/Inter_18pt-Italic.ttf'),
   });
+
+  useEffect(() => {
+    initialize();
+  }, []);
   
   useEffect(() => {
     if (fontsLoaded) {

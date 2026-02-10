@@ -2,11 +2,35 @@ import apiClient from "../client";
 
 const API_URL = '/auth';
 
-export const loginUser = async (email: string, password: string) => {
-  const response = await apiClient.post(`${API_URL}/login`, {
-    email,
-    password,
-  });
-  
-  return response.data;
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+  /*user: {
+    id: string;
+    email: string;
+    name: string;
+  };*/
+}
+
+export const authApi = {
+
+  login: async (credentials: LoginCredentials): Promise<LoginResponse> => {
+    const response = await apiClient.post<LoginResponse>(`${API_URL}/login`, credentials);
+    return response.data;
+  },
+
+  refreshToken: async (refreshToken: string) => {
+    const response = await apiClient.post(`${API_URL}/refreshToken`, { refreshToken });
+    return response.data;
+  },
+
+  logout: async (): Promise<void> => {
+    await apiClient.post(`${API_URL}/logout`);
+  },
+
 };

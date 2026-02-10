@@ -22,7 +22,8 @@ import FloatingInput from '@/components/ui/floating-input';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { loginUser } from "../api/services/authService";
+import { authApi } from "../api/services/authService";
+import { useAuthStore } from "../store/authStore";
 
 const loginSchema = z.object({
   email: z.string().min(1, "Email is required").regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please enter a valid email address"),
@@ -33,6 +34,8 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
+  const login = useAuthStore((state) => state.login);
+  const [loading, setLoading] = useState(false);
   const { colorScheme } = useColorScheme();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
@@ -48,15 +51,23 @@ export default function LoginScreen() {
   const onSubmit = async (data: LoginFormData) => {
     try {
       console.log("Attempting login...");
+      setLoading(true);
 
       // Call the separated API function
-      await loginUser(data.email, data.password);
+      const responseData = await authApi.login(data);
+
+      await login(
+        responseData.accessToken,
+        responseData.refreshToken,
+        { id: "0", email: data.email, name: "John Doe" } // I will modify dynamically later when I have the user data from the backend
+      );
 
       console.log("Login Success for: ", data.email);
       navigation.navigate('Home');
-
-    } catch (error) {
-      console.error("Login Failed:", error);
+    } catch (error: any) {
+      console.error(error.response?.data?.message || 'An error occurred during login');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -171,7 +182,7 @@ export default function LoginScreen() {
               onPress={handleSubmit(onSubmit)}
             >
               <ButtonText className="font-bold text-white dark:text-black text-lg">
-                Sign In
+                {loading ? 'Logging in...' : 'Login'}
               </ButtonText>
             </Button>
 
