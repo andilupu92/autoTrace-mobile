@@ -21,26 +21,22 @@ import WelcomeCard from "./WelcomeCard";
 import FloatingInput from '@/components/ui/floating-input';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/AppNavigator';
-import { authApi } from "../api/services/authService";
-import { useAuthStore } from "../store/authStore";
+import { RootStackParamList } from '../../navigation/AppNavigator';
 
-const loginSchema = z.object({
+const signUpSchema = z.object({
   email: z.string().min(1, "Email is required").regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please enter a valid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-type LoginFormData = z.infer<typeof loginSchema>;
+type SignUpFormData = z.infer<typeof signUpSchema>;
 
-export default function LoginScreen() {
+export default function SignUpScreen() {
   const [showPassword, setShowPassword] = useState(false);
-  const login = useAuthStore((state) => state.login);
-  const [loading, setLoading] = useState(false);
   const { colorScheme } = useColorScheme();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  const { control, handleSubmit, formState: { errors, dirtyFields }, watch } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+  const { control, handleSubmit, formState: { errors, dirtyFields }, watch } = useForm<SignUpFormData>({
+    resolver: zodResolver(signUpSchema),
     defaultValues: { email: "", password: "" },
     mode: "onChange"
   });
@@ -48,27 +44,10 @@ export default function LoginScreen() {
   const emailValue = watch("email");
   const isEmailValid = !errors.email && dirtyFields.email && emailValue.length > 0;
 
-  const onSubmit = async (data: LoginFormData) => {
-    try {
-      console.log("Attempting login...");
-      setLoading(true);
+  const onSubmit = (data: SignUpFormData) => {
+    console.log("Sign up with email:", data.email);
 
-      // Call the separated API function
-      const responseData = await authApi.login(data);
-
-      await login(
-        responseData.accessToken,
-        responseData.refreshToken,
-        { id: "0", email: data.email, name: "John Doe" } // I will modify dynamically later when I have the user data from the backend
-      );
-
-      console.log("Login Success for: ", data.email);
-      navigation.navigate('Home');
-    } catch (error: any) {
-      console.error(error.response?.data?.message || 'An error occurred during login');
-    } finally {
-      setLoading(false);
-    }
+    navigation.navigate('Login');
   };
 
   const iconColor = colorScheme === 'dark' ? '#94a3b8' : '#9ca3af';
@@ -76,13 +55,14 @@ export default function LoginScreen() {
 
   return (
     <Box className="flex-1 bg-white dark:bg-slate-950">
-      
+
       {/* HEADER */}
       <Box style={{ zIndex: 10 }}>
-        <WelcomeCard primaryTitle="Welcome" 
-                     secondaryTitle="Back" 
-                     contain="Please sign in to continue"
-                     showBackButton={false} />
+        <WelcomeCard primaryTitle="Create"
+                     secondaryTitle="Account"   
+                     contain="Please sign Up to continue"
+                     showBackButton={true} 
+                     onBackPress={() => navigation.goBack()}/>
       </Box>
 
       <KeyboardAvoidingView
@@ -94,9 +74,7 @@ export default function LoginScreen() {
           className="flex-1 px-8 pt-12 mt-12 bg-white dark:bg-slate-950 rounded-t-[35px]"
           style={{ zIndex: 20 }}
         >
-          
           <Box className="mt-2">
-            
             {/* --- EMAIL INPUT --- */}
             <FormControl isInvalid={!!errors.email} className="mb-5">
               <Controller
@@ -166,23 +144,14 @@ export default function LoginScreen() {
               </FormControlError>
             </FormControl>
 
-            {/* Forgot Password Link */}
-            <Box className="items-end mb-8 mr-1"> 
-              <Link onPress={() => navigation.navigate('ForgotPassword')}>
-                <LinkText className="text-sm text-blue-500 dark:text-blue-400 font-medium no-underline">
-                  Forgot your password?
-                </LinkText>
-              </Link>
-            </Box>
-
-            {/* Sign In Button */}
+            {/* Sign Up Button */}
             <Button 
               size="xl" 
               className="bg-black dark:bg-white h-16 rounded-2xl shadow-lg shadow-gray-200 dark:shadow-none active:scale-[0.98]" 
               onPress={handleSubmit(onSubmit)}
             >
               <ButtonText className="font-bold text-white dark:text-black text-lg">
-                {loading ? 'Logging in...' : 'Login'}
+                Sign Up
               </ButtonText>
             </Button>
 
@@ -231,15 +200,15 @@ export default function LoginScreen() {
             {/* Footer Links */}
             <HStack className="justify-center mt-8 items-center" space="xs">
               <Text className="text-gray-500 dark:text-slate-500 font-medium">
-                Don't have an account?
+                Already have an account?
               </Text>
-              <Link onPress={() => navigation.navigate('SignUp')}>
+              <Link onPress={() => navigation.navigate('Login')}>
                 <LinkText className="text-blue-600 dark:text-blue-400 font-bold no-underline">
-                  Sign up
+                  Sign in
                 </LinkText>
               </Link>
             </HStack>
-            
+
           </Box>
         </VStack>
       </KeyboardAvoidingView>
