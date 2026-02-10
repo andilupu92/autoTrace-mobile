@@ -65,7 +65,10 @@ export default function LoginScreen() {
       console.log("Login Success for: ", data.email);
       navigation.navigate('Home');
     } catch (error: any) {
-      console.error(error.response?.data?.message || 'An error occurred during login');
+      const errorMessage = error?.response?.data?.message 
+        || error?.message 
+        || 'An error occurred during login';
+      console.error('Login error:', errorMessage);
     } finally {
       setLoading(false);
     }

@@ -3,6 +3,7 @@ import LoginScreen from "../page/auth/login";
 import HomeScreen from "../page/auth/home";
 import ForgotPasswordScreen from '../page/auth/forgotPassword';
 import SignUpScreen from '../page/auth/signUp';
+import { useAuthStore } from '../store/authStore';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -12,14 +13,22 @@ export type RootStackParamList = {
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+//const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
 export default function AppNavigator() {
     return (
       <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: true }}>
-        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="SignUp" component={SignUpScreen} options={{ headerShown: false }} />
-      </Stack.Navigator>
+        {/*{isAuthenticated ? (
+          <>*/}
+            <Stack.Screen name="SignUp" component={SignUpScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ headerShown: false }} />
+          {/*</>
+          ) : (
+          <>*/}
+            <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
+          {/*</>
+        )}*/}
+        </Stack.Navigator>
     );
 }
