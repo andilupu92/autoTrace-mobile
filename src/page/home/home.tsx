@@ -18,7 +18,7 @@ export default function HomeScreen() {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
     const openUserDetails = () => {
-        //navigation.navigate('UserDetails');
+        navigation.navigate('UserDetails');
     };
     
   return (

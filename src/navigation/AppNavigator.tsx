@@ -3,12 +3,14 @@ import LoginScreen from "../page/auth/login";
 import HomeScreen from "../page/home/home";
 import ForgotPasswordScreen from '../page/auth/forgotPassword';
 import SignUpScreen from '../page/auth/signUp';
+import UserDetailsScreen from '../page/home/userDetails';
 
 export type RootStackParamList = {
   Login: undefined;
   Home: undefined;
   ForgotPassword: undefined;
   SignUp: undefined;
+  UserDetails: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -26,6 +28,7 @@ export default function AppNavigator() {
           ) : (
           <>*/}
             <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="UserDetails" component={UserDetailsScreen} options={{ presentation: 'transparentModal', headerShown: false, animation: 'fade', contentStyle: { backgroundColor: 'transparent' } }} />
           {/*</>
         )}*/}
         </Stack.Navigator>
