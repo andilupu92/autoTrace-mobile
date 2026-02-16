@@ -1,4 +1,4 @@
-import { TouchableOpacity, Text } from 'react-native';
+import { Button, ButtonText } from '@/components/ui/button';
 import { authApi } from "../../api/services/authService";
 import { useAuthStore } from "../../store/authStore";
 
@@ -7,6 +7,7 @@ export const LogoutButton = () => {
   const logout = useAuthStore((state) => state.logout);
 
   const handleLogout = async () => {
+    console.log('Logging out...');
     try {
       await authApi.logout();
     } catch (error) {
@@ -17,8 +18,13 @@ export const LogoutButton = () => {
   };
 
   return (
-    <TouchableOpacity onPress={handleLogout}>
-      <Text>Logout</Text>
-    </TouchableOpacity>
+    <Button onPress={handleLogout}
+            className="bg-red-500 rounded-xl active:opacity-80"
+            size="lg"
+    >
+      <ButtonText className="font-medium">
+        Log Out
+      </ButtonText>
+    </Button>
   );
 };
