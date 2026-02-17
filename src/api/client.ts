@@ -1,12 +1,25 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { secureStorage } from '../utils/secureStorage';
 import { useAuthStore } from '../store/authStore';
+import Constants from 'expo-constants';
 
-const BASE_URL = 'http://10.0.2.2:8080';
+const getBaseUrl = () => {
+  const hostUri = Constants.expoConfig?.hostUri;
+
+  // for web, we can just use localhost
+  if (!hostUri) {
+    return 'http://localhost:8080';
+  }
+
+  const ip = hostUri.split(':')[0];
+
+  // For mobile, we need to use the IP address of the machine running the server
+  return `http://${ip}:8080`;
+};
 
 // Create a single instance to use everywhere
 const apiClient = axios.create({
-  baseURL: BASE_URL,
+  baseURL: getBaseUrl(),
   timeout: 10000, // Abort request if it takes more than 10 seconds
   headers: {
     'Content-Type': 'application/json',
@@ -89,6 +102,7 @@ apiClient.interceptors.response.use(
 
       try {
         // Call refresh token endpoint
+        const BASE_URL =  getBaseUrl();
         const response = await axios.post(`${BASE_URL}/auth/refreshToken`, {
           refreshToken,
         });
