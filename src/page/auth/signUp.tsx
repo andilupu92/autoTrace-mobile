@@ -22,6 +22,7 @@ import FloatingInput from '@/components/ui/floating-input';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
+import { authApi } from "@/src/api/services/authService";
 
 const signUpSchema = z.object({
   email: z.string().min(1, "Email is required").regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please enter a valid email address"),
@@ -44,10 +45,22 @@ export default function SignUpScreen() {
   const emailValue = watch("email");
   const isEmailValid = !errors.email && dirtyFields.email && emailValue.length > 0;
 
-  const onSubmit = (data: SignUpFormData) => {
-    console.log("Sign up with email:", data.email);
+  const onSubmit = async (data: SignUpFormData) => {
+    try {
+      console.log("Sign up with email:", data.email);
 
-    navigation.navigate('Login');
+      const responseData = await authApi.signUp(data);
+      
+      if (responseData && responseData.includes("created")) {
+        console.log(responseData);
+        navigation.navigate('Login');
+      } else {
+        console.error("Unexpected response:", responseData);
+      }
+
+    } catch (error) {
+      console.error("Sign up failed:", error);
+    }
   };
 
   const iconColor = colorScheme === 'dark' ? '#94a3b8' : '#9ca3af';
