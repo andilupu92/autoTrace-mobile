@@ -48,9 +48,11 @@ const processQueue = (error: AxiosError | null, token: string | null = null) => 
 // Request interceptor - Add access token to requests
 apiClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
+    const publicRoutes = ['/auth/login', '/auth/refresh', '/auth/register'];
+    const isPublicRoute = publicRoutes.some(route => config.url?.endsWith(route));
     const { accessToken } = useAuthStore.getState();
     
-    if (accessToken && config.headers) {
+    if (accessToken && config.headers && !isPublicRoute) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
     
@@ -103,7 +105,7 @@ apiClient.interceptors.response.use(
       try {
         // Call refresh token endpoint
         const BASE_URL =  getBaseUrl();
-        const response = await axios.post(`${BASE_URL}/auth/refreshToken`, {
+        const response = await axios.post(`${BASE_URL}/auth/refresh`, {
           refreshToken,
         });
 
