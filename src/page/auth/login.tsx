@@ -202,10 +202,10 @@ export default function LoginScreen() {
                   <ActivityIndicator 
                     size="small" 
                     color={Platform.OS === 'ios' ? undefined : '#FFFFFF'} 
-                    className="text-white dark:text-black"
+                    className="text-white dark:text-blue-400 mr-2"
                   />
                 ) : null}
-                <ButtonText className="font-bold text-white text-lg">
+                <ButtonText className="font-bold dark:text-white text-lg">
                   {isLoading ? 'Logging in...' : 'Login'}
                 </ButtonText>
               </HStack>
