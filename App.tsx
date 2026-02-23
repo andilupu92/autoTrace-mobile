@@ -8,7 +8,6 @@ import * as SplashScreen from 'expo-splash-screen';
 import '@/global.css';
 import { useEffect } from "react";
 import { useAuthStore } from "./src/store/authStore";
-import { View, ActivityIndicator } from "react-native";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -27,28 +26,23 @@ export default function App() {
   }, []);
   
   useEffect(() => {
-    if (fontsLoaded) {
-      SplashScreen.hideAsync();
+    if (fontsLoaded && !isLoading) {
+      const hideSplash = async () => {
+        await SplashScreen.hideAsync();
+      };
+      hideSplash();
     }
-  }, [fontsLoaded]);
+  }, [fontsLoaded, isLoading]);
 
-  if (!fontsLoaded) {
+  if (!fontsLoaded || isLoading) {
     return null;
   }
 
   return (
-    <>
-      {isLoading ? (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator size="large" color="#007AFF" />
-        </View>
-      ) : (
-        <GluestackUIProvider mode={(colorScheme ?? "light") as "light" | "dark"}>
-          <NavigationContainer>
-            <AppNavigator />
-          </NavigationContainer>
-        </GluestackUIProvider>
-      )}
-    </>
+    <GluestackUIProvider mode={(colorScheme ?? "light") as "light" | "dark"}>
+      <NavigationContainer>
+        <AppNavigator />
+      </NavigationContainer>
+    </GluestackUIProvider>
   );
 }
