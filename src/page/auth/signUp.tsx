@@ -9,7 +9,7 @@ import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
 import { Link, LinkText } from '@/components/ui/link';
-import { Button, ButtonText } from '@/components/ui/button';
+import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
 import { 
   FormControl,
   FormControlError, 
@@ -23,6 +23,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { authApi } from "@/src/api/services/authService";
+import GoogleIcon from "@/src/icons/GoogleIcon";
 
 const signUpSchema = z.object({
   email: z.string().min(1, "Email is required").regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please enter a valid email address"),
@@ -35,6 +36,7 @@ export default function SignUpScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const { colorScheme } = useColorScheme();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const [isGoogleLoading, setGoogleLoading] = useState(false);
 
   const { control, handleSubmit, formState: { errors, dirtyFields }, watch } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
@@ -61,7 +63,18 @@ export default function SignUpScreen() {
     } catch (error) {
       console.error("Sign up failed:", error);
     }
-  };
+  }
+
+  const handleSubmitGoogle = async () => {
+    setGoogleLoading(true);
+    try {
+      console.log("Google login clicked");
+    } catch (error) {
+      console.error('Google login error:', error);
+    } finally {
+      setGoogleLoading(false);
+    }
+  }
 
   const iconColor = colorScheme === 'dark' ? '#94a3b8' : '#9ca3af';
   const activeIconColor = '#10b981';
@@ -177,38 +190,25 @@ export default function SignUpScreen() {
             </HStack>
 
             {/* Social Login Buttons Container */}
-            <HStack className="justify-center mt-6" space="lg">
-              
-              {/* Google Button */}
-              <TouchableOpacity 
-                className="w-16 h-16 items-center justify-center border border-gray-200 dark:border-slate-800 rounded-full bg-white dark:bg-slate-900 shadow-sm"
-                onPress={() => console.log('Google')}
-              >
-                <AntDesign name="google" size={28} color="#EB4335" /> 
-              </TouchableOpacity>
-
-              {/* Facebook Button */}
-              <TouchableOpacity 
-                className="w-16 h-16 items-center justify-center border border-gray-200 dark:border-slate-800 rounded-full bg-white dark:bg-slate-900 shadow-sm"
-                onPress={() => console.log('Facebook')}
-              >
-                <FontAwesome name="facebook" size={28} color="#1877F2" />
-              </TouchableOpacity>
-
-              {/* Apple Button - Condiționat pentru iOS 
-              {Platform.OS === 'ios' && (
-                <TouchableOpacity 
-                  className="w-16 h-16 items-center justify-center border border-gray-200 dark:border-slate-800 rounded-full bg-white dark:bg-slate-900 shadow-sm"
-                  onPress={() => console.log('Apple')}
+            <Button 
+              size="xl" 
+              action="secondary"
+              className="w-full h-16 items-center justify-center border border-[#747775] bg-white dark:border-[#8E918F] dark:bg-[#131314] rounded-2xl shadow-lg shadow-gray-200 dark:shadow-none border border-gray-200" 
+              isDisabled={isGoogleLoading}
+              onPress={handleSubmitGoogle}
+            >
+              <HStack space="md" className="items-center justify-center">
+                {isGoogleLoading ? (
+                  <ButtonSpinner color="#747775" className="mr-2" />
+                ) : (
+                  <GoogleIcon width={18} height={18} />
+                )}
+                <ButtonText className="text-[14px] leading-[20px] text-[#1F1F1F] dark:text-[#E3E3E3] font-medium"
                 >
-                  <AntDesign 
-                    name="apple1" 
-                    size={28} 
-                    color={useColorScheme().colorScheme === 'dark' ? 'white' : 'black'} 
-                  />
-                </TouchableOpacity>
-              )}*/}
-            </HStack>
+                  {isGoogleLoading ? 'Signing in...' : 'Sign in with Google'}
+                </ButtonText>
+              </HStack>
+            </Button>
 
             {/* Footer Links */}
             <HStack className="justify-center mt-8 items-center" space="xs">

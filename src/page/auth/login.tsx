@@ -235,7 +235,7 @@ export default function LoginScreen() {
                 )}
                 <ButtonText className="text-[14px] leading-[20px] text-[#1F1F1F] dark:text-[#E3E3E3] font-medium"
                 >
-                  {isGoogleLoading ? 'Signing in...' : 'Sign in with Google'}
+                  {isGoogleLoading ? 'Signing up...' : 'Sign up with Google'}
                 </ButtonText>
               </HStack>
             </Button>
