@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Dimensions, TouchableOpacity, Animated } from 'react-native';
 import Svg, { Defs, ClipPath, Path, Text as SvgText, Circle, G } from 'react-native-svg';
 import { useColorScheme } from 'nativewind';
@@ -50,25 +50,41 @@ const cardPath = [
   'Z',
 ].join(' ');
 
-export default function WelcomeCard({primaryTitle, secondaryTitle, contain, showBackButton, onBackPress}: WelcomeCardProps) {
-  const { colorScheme, toggleColorScheme } = useColorScheme();
-  const isDark = colorScheme === 'dark';
-  const rotateAnim = useRef(new Animated.Value(0)).current;
+const AnimatedG = Animated.createAnimatedComponent(G);
 
+export default function WelcomeCard({primaryTitle, secondaryTitle, contain, showBackButton, onBackPress}: WelcomeCardProps) {
+  const { colorScheme, setColorScheme } = useColorScheme();
+  const [currentTheme, setCurrentTheme] = useState(colorScheme || 'light');
+  const [isDark, setIsDark] = useState(colorScheme === 'dark');
+  const themeAnim = useRef(new Animated.Value(colorScheme === 'dark' ? 1 : 0)).current;
+  
+
+  useEffect(() => {
+    const dark = colorScheme === 'dark';
+    setIsDark(dark);
+    themeAnim.setValue(dark ? 1 : 0);
+  }, [colorScheme]);
+  
   const theme = isDark ? THEMES.dark : THEMES.light;
 
   const handleToggle = () => {
-    toggleColorScheme();
+    const nextIsDark = !isDark;
+    
+    // Trigger NativeWind and local state
+    setColorScheme(nextIsDark ? 'dark' : 'light');
+    setCurrentTheme(nextIsDark ? 'dark' : 'light');
+    setIsDark(nextIsDark);
 
-    // Animation of rotate smooth
-    Animated.timing(rotateAnim, {
-      toValue: isDark ? 0 : 1,
-      duration: 400,
+    // Smooth transition animation
+    Animated.spring(themeAnim, {
+      toValue: nextIsDark ? 1 : 0,
       useNativeDriver: true,
+      friction: 8,
+      tension: 40
     }).start();
   };
 
-  const rotation = rotateAnim.interpolate({
+  const rotation = themeAnim.interpolate({
     inputRange: [0, 1],
     outputRange: ['0deg', '360deg'],
   });
@@ -85,7 +101,7 @@ export default function WelcomeCard({primaryTitle, secondaryTitle, contain, show
 
   return (
     <View style={{ width: '100%' }}>
-      <Svg width={W} height={H} pointerEvents="none" viewBox={`0 0 ${W} ${H}`}>
+      <Svg key={currentTheme} width={W} height={H} pointerEvents="none" viewBox={`0 0 ${W} ${H}`}>
         <Defs>
           <ClipPath id="cardClip">
             <Path d={cardPath} />
@@ -134,7 +150,17 @@ export default function WelcomeCard({primaryTitle, secondaryTitle, contain, show
           fill={theme.backIconColor}
           opacity={0.95}
         />
-
+        <AnimatedG 
+          style={{ 
+            transform: [
+              { translateX: iconX }, 
+              { translateY: iconY }, 
+              { rotate: rotation }, 
+              { translateX: -iconX }, 
+              { translateY: -iconY }
+            ] 
+          }}
+        >
         {/* Sun/moon icon - dynamically changes */}
         {!isDark ? (
           // Sun
@@ -176,6 +202,7 @@ export default function WelcomeCard({primaryTitle, secondaryTitle, contain, show
             <Circle cx={iconX + 7} cy={iconY + 10} r={1.5} fill={theme.iconColor} opacity={0.8} />
           </G>
         )}
+        </AnimatedG>
       </Svg>
 
       {/* Back button with icon - positioned outside SVG */}
@@ -192,7 +219,7 @@ export default function WelcomeCard({primaryTitle, secondaryTitle, contain, show
               borderRadius: backButtonRadius,
               justifyContent: 'center',
               alignItems: 'center',
-              zIndex: 99,
+              zIndex: 999,
             }}
             activeOpacity={0.7}
           >
@@ -204,33 +231,28 @@ export default function WelcomeCard({primaryTitle, secondaryTitle, contain, show
           </TouchableOpacity>
         )}
 
-      {/* TouchableOpacity over the circle for toggle */}
+      {/* The Toggle Button */}
       <Animated.View
-        style={{
-          position: 'absolute',
-          right: curveR * 0.35 - iconRadius,
-          bottom: curveR * 0.35 - iconRadius,
-          width: iconRadius * 2,
-          height: iconRadius * 2,
-          zIndex: 99,
-          transform: [{ rotate: rotation }],
-        }}
-      >
-        
-        <TouchableOpacity
-          onPress={handleToggle}
-          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
           style={{
-            width: '100%',
-            height: '100%',
-            borderRadius: iconRadius,
-            justifyContent: 'center',
-            alignItems: 'center',
+            position: 'absolute',
+            right: (screenWidth - iconX) - iconRadius,
+            bottom: (H - iconY) - iconRadius,
+            width: iconRadius * 2,
+            height: iconRadius * 2,
+            zIndex: 999,
+            transform: [{ rotate: rotation }],
           }}
-          activeOpacity={0.7}
-        />
-        <View style={{ flex: 1 }} />
-      </Animated.View>
+        >
+          <TouchableOpacity
+            onPress={handleToggle}
+            activeOpacity={0.6}
+            style={{
+              flex: 1,
+              backgroundColor: 'transparent',
+              borderRadius: iconRadius,
+            }}
+          />
+        </Animated.View>
     </View>
   );
 }
