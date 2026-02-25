@@ -23,15 +23,21 @@ import { Ionicons } from "@expo/vector-icons";
 import { FormControl, FormControlError, FormControlErrorText } from "@/components/ui/form-control";
 import { Controller, useForm } from "react-hook-form";
 import { FloatingInput } from "@/components/ui/floating-input";
+import { FloatingSelect } from "@/components/ui/floating-select";
+import { carApi } from "@/src/api/services/carService";
 
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const CAR_BRANDS = ["BMW", "Audi", "Mercedes", "Toyota", "Ford", "Tesla", "Honda", "Volkswagen"];
+const CAR_BRANDS = [
+  { label: 'Volkswagen', value: 'volkswagen' },
+  { label: 'BMW', value: 'bmw' },
+  { label: 'Toyota', value: 'toyota' },
+];
 
 const insertCarSchema = z.object({
-  selectedBrand: z.string().optional(),
+  brand: z.string().min(1, "Brand is required"),
   model: z.string().min(1, "Model is required"),
   year: z.string().min(4, "Year must be at least 4 characters"),
   kilometers: z.string().min(1, "Kilometers is required"),
@@ -48,9 +54,9 @@ export default function AddCarCard() {
   const [kilometers, setKilometers] = useState("");
   const [isLoading, setLoading] = useState(false);
 
-  const { control, handleSubmit } = useForm<InsertCarFormData>({
+  const { control, handleSubmit, formState: { errors } } = useForm<InsertCarFormData>({
       resolver: zodResolver(insertCarSchema),
-      defaultValues: { selectedBrand: "", model: "", year: "", kilometers: "" },
+      defaultValues: { brand: "", model: "", year: "", kilometers: "" },
       mode: "onChange"
     });
 
@@ -93,12 +99,12 @@ export default function AddCarCard() {
     transform: [{ scale: formScale.value }],
   }));
 
-  const onSave = (data: InsertCarFormData) => {
-    console.log("Form data on submit:", data);
+  const onSave = async (data: InsertCarFormData) => {
     try {
         setLoading(true);
-        console.log("Saving car with data:", { ...data, brand: selectedBrand });
-        console.log(data);
+
+        const responseData = await carApi.register(data);
+
         toggle();
     } catch (error) {
         console.error("Error registering vehicle:", error);
@@ -192,78 +198,29 @@ export default function AddCarCard() {
             <Box style={{ height: 1, backgroundColor: "#f1f5f9", marginBottom: 20 }} />
 
             {/* Brand */}
-            <Text style={styles.label}>Brand</Text>
-            <TouchableOpacity
-              onPress={() => setShowBrandPicker(!showBrandPicker)}
-              style={[
-                styles.inputBase,
-                {
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  borderColor: selectedBrand ? "#2563eb" : "#e2e8f0",
-                  marginBottom: showBrandPicker ? 6 : 16,
-                },
-              ]}
-            >
-              <Text style={{ color: selectedBrand ? "#0f172a" : "#94a3b8", fontSize: 15 }}>
-                {selectedBrand ?? "Select brand..."}
-              </Text>
-              <Ionicons
-                name={showBrandPicker ? "chevron-up" : "chevron-down"}
-                size={16}
-                color="#94a3b8"
-              />
-            </TouchableOpacity>
-
-            {showBrandPicker && (
-              <Box
-                style={{
-                  backgroundColor: "#ffffff",
-                  borderRadius: 12,
-                  marginBottom: 16,
-                  borderWidth: 1,
-                  borderColor: "#e2e8f0",
-                  overflow: "hidden",
-                }}
-              >
-                {CAR_BRANDS.map((brand, i) => (
-                  <TouchableOpacity
-                    key={brand}
-                    onPress={() => {
-                      setSelectedBrand(brand);
-                      setShowBrandPicker(false);
-                    }}
-                    style={{
-                      paddingHorizontal: 16,
-                      paddingVertical: 13,
-                      backgroundColor: selectedBrand === brand ? "#eff6ff" : "transparent",
-                      borderBottomWidth: i < CAR_BRANDS.length - 1 ? 1 : 0,
-                      borderColor: "#f1f5f9",
-                      flexDirection: "row",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: selectedBrand === brand ? "#2563eb" : "#374151",
-                        fontSize: 14,
-                        fontWeight: selectedBrand === brand ? "600" : "400",
-                      }}
-                    >
-                      {brand}
-                    </Text>
-                    {selectedBrand === brand && (
-                      <Ionicons name="checkmark" size={16} color="#2563eb" />
+            <FormControl className="mb-5" style={{ zIndex: 999 }} isInvalid={!!errors.brand}>
+                <Controller
+                    control={control}
+                    name="brand"
+                    render={({ field: { onChange, value } }) => (
+                    <FloatingSelect
+                        label="Brand"
+                        value={value}
+                        onValueChange={onChange}
+                        options={CAR_BRANDS}
+                        isInvalid={!!errors.brand}
+                    />
                     )}
-                  </TouchableOpacity>
-                ))}
-              </Box>
-            )}
+                />
+                <FormControlError>
+                    <FormControlErrorText className="ml-2 mt-1 text-xs text-red-500">
+                        {errors.brand?.message}
+                    </FormControlErrorText>
+                </FormControlError>
+            </FormControl>
 
             {/* Model Input */}
-            <FormControl className="mb-5">
+            <FormControl className="mb-5" isInvalid={!!errors.model}>
               <Controller
                 control={control}
                 name="model"
@@ -275,18 +232,19 @@ export default function AddCarCard() {
                     onBlur={onBlur}
                     keyboardType="default"
                     autoCapitalize="none"
+                    isInvalid={!!errors.model}
                   />
                 )}
               />
               <FormControlError>
-                <FormControlErrorText className="ml-2 mt-1 text-xs">
-                  {/* {errors.email?.message} */}
+                <FormControlErrorText className="ml-2 mt-1 text-xs text-red-500">
+                  {errors.model?.message}
                 </FormControlErrorText>
               </FormControlError>
             </FormControl>
 
             {/* Year Input */}
-            <FormControl className="mb-5">
+            <FormControl className="mb-5" isInvalid={!!errors.year}>
               <Controller
                 control={control}
                 name="year"
@@ -298,18 +256,19 @@ export default function AddCarCard() {
                     onBlur={onBlur}
                     keyboardType="numeric"
                     autoCapitalize="none"
+                    isInvalid={!!errors.year}
                   />
                 )}
               />
               <FormControlError>
-                <FormControlErrorText className="ml-2 mt-1 text-xs">
-                  {/* {errors.email?.message} */}
+                <FormControlErrorText className="ml-2 mt-1 text-xs text-red-500">
+                  {errors.year?.message}
                 </FormControlErrorText>
               </FormControlError>
             </FormControl>
 
             {/* Kilometers Input */}
-            <FormControl className="mb-5">
+            <FormControl className="mb-5" isInvalid={!!errors.kilometers}>
               <Controller
                 control={control}
                 name="kilometers"
@@ -321,12 +280,13 @@ export default function AddCarCard() {
                     onBlur={onBlur}
                     keyboardType="numeric"
                     autoCapitalize="none"
+                    isInvalid={!!errors.kilometers}
                   />
                 )}
               />
               <FormControlError>
-                <FormControlErrorText className="ml-2 mt-1 text-xs">
-                  {/* {errors.email?.message} */}
+                <FormControlErrorText className="ml-2 mt-1 text-xs text-red-500">
+                  {errors.kilometers?.message}
                 </FormControlErrorText>
               </FormControlError>
             </FormControl>
@@ -360,25 +320,5 @@ export default function AddCarCard() {
         )}
       </Box>
     </Box>
-  );
+  )
 }
-
-const styles = {
-  label: {
-    color: "#94a3b8",
-    fontSize: 11,
-    fontWeight: "600" as const,
-    letterSpacing: 1,
-    textTransform: "uppercase" as const,
-    marginBottom: 8,
-  },
-  inputBase: {
-    backgroundColor: "#f8fafc",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 15,
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-  },
-};

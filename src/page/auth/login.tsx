@@ -139,7 +139,7 @@ export default function LoginScreen() {
                 )}
               />
               <FormControlError>
-                <FormControlErrorText className="ml-2 mt-1 text-xs">
+                <FormControlErrorText className="ml-2 mt-1 text-xs text-red-500">
                   {errors.email?.message}
                 </FormControlErrorText>
               </FormControlError>
@@ -175,7 +175,7 @@ export default function LoginScreen() {
                 )}
               />
               <FormControlError>
-                <FormControlErrorText className="ml-2 mt-1 text-xs">
+                <FormControlErrorText className="ml-2 mt-1 text-xs text-red-500">
                   {errors.password?.message}
                 </FormControlErrorText>
               </FormControlError>
