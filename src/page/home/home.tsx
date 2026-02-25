@@ -1,17 +1,17 @@
 import { TouchableOpacity } from 'react-native';
 import { 
-  Box, 
-  VStack, 
-  Text,
-  Avatar, 
   AvatarImage, 
   AvatarFallbackText,
-  Center 
 } from '@gluestack-ui/themed';
+import { Text } from '@/components/ui/text';
+import { Box } from '@/components/ui/box';
+import { VStack } from '@/components/ui/vstack';
+import { Avatar } from '@/components/ui/avatar';
 import { Heading } from '@/components/ui/heading';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
+import AddCarCard from './addCar';
 
 export default function HomeScreen() {
 
@@ -28,7 +28,7 @@ export default function HomeScreen() {
       <Box className="px-8 pt-16 pb-6 flex-row justify-between items-center" style={{ zIndex: 10 }}>
         <VStack className="flex-1">
             <Heading className="text-black dark:text-white text-2xl font-light">
-                Hello, <Text className="font-bold">Andrei</Text>
+                Hello, <Text className="font-bold text-2xl text-black">Andrei</Text>
             </Heading>
         </VStack>
         
@@ -61,11 +61,9 @@ export default function HomeScreen() {
         style={{ zIndex: 20 }}
       >
          
-         <Center className="flex-1 pb-20">
-            <Text className="text-gray-500 dark:text-gray-400 text-lg">
-                This is the Home Screen. Tap on the avatar to view user details.
-            </Text>
-         </Center>
+         <Box>
+            <AddCarCard />
+         </Box>
 
       </VStack>
     </Box>
