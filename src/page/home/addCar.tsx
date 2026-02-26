@@ -39,26 +39,21 @@ const CAR_BRANDS = [
 const insertCarSchema = z.object({
   brand: z.string().min(1, "Brand is required"),
   model: z.string().min(1, "Model is required"),
-  year: z.string().min(4, "Year must be at least 4 characters"),
-  kilometers: z.string().min(1, "Kilometers is required"),
+  year: z.coerce.number().min(1886, "Year must be 1886 or later").max(new Date().getFullYear() + 1, `Year cannot be in the future`),
+  kilometers: z.coerce.number().min(0, "Kilometers cannot be negative"),
 });
 
-type InsertCarFormData = z.infer<typeof insertCarSchema>;
+type InsertCarFormData = z.input<typeof insertCarSchema>;
 
 export default function AddCarCard() {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
-  const [showBrandPicker, setShowBrandPicker] = useState(false);
-  const [model, setModel] = useState("");
-  const [year, setYear] = useState("");
-  const [kilometers, setKilometers] = useState("");
   const [isLoading, setLoading] = useState(false);
 
   const { control, handleSubmit, formState: { errors } } = useForm<InsertCarFormData>({
       resolver: zodResolver(insertCarSchema),
-      defaultValues: { brand: "", model: "", year: "", kilometers: "" },
+      defaultValues: { brand: "", model: "", year: 0, kilometers: 0 },
       mode: "onChange"
-    });
+  });
 
   // Shared values for animations
   const rotation = useSharedValue(0);
@@ -78,7 +73,6 @@ export default function AddCarCard() {
     } else {
       formOpacity.value = withTiming(0, { duration: 180 });
       formScale.value = withSpring(0.97, { damping: 14, stiffness: 100 });
-      setShowBrandPicker(false);
     }
 
     setIsOpen(opening);
@@ -104,6 +98,8 @@ export default function AddCarCard() {
         setLoading(true);
 
         const responseData = await carApi.register(data);
+
+        console.log("Vehicle registered successfully:", responseData);
 
         toggle();
     } catch (error) {

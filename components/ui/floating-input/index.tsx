@@ -8,7 +8,7 @@ import type { TextInputProps } from 'react-native';
 
 interface FloatingInputProps extends Omit<TextInputProps, 'placeholder' | 'onBlur' | 'onFocus'> {
   label: string;
-  value: string;
+  value: any;
   onChangeText: (text: string) => void;
   onBlur?: () => void;
   onFocus?: () => void;

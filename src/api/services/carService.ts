@@ -5,14 +5,14 @@ const API_URL = '/car';
 export interface CarCredentials {
   brand: string;
   model: string;
-  year: string;
-  kilometers: string;
+  year: unknown;
+  kilometers: unknown;
 }
 
 export const carApi = {
 
   register: async (credentials: CarCredentials) => {
-    const response = await apiClient.post(`${API_URL}/register`, credentials);
+    const response = await apiClient.post(`${API_URL}/add`, credentials);
     return response.data;
   },
 
