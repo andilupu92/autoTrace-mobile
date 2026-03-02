@@ -13,6 +13,8 @@ import { Heading } from '@/components/ui/heading';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
+import PremiumDocumentCard from './documents';
+import DocumentsHeader from './documentHeader';
 
 const { width } = Dimensions.get("window");
 const DARK_HEADER_HEIGHT = 180;
@@ -24,7 +26,7 @@ export default function Cars() {
 
     const openUserDetails = () => {
         navigation.navigate('UserDetails');
-    };
+};
   return (
     <View className="flex-1 bg-gray-800">
       
@@ -111,6 +113,18 @@ export default function Cars() {
           <StatBubble name="Dacia 1300" km="400.000 km" />
         </View>
 
+
+    
+        <View
+        className="absolute w-full px-6"
+        style={{ top: WHITE_CARD_HEIGHT + 80 }}
+        >
+            <DocumentsHeader onAdd={() => console.log("Add document")} />
+            <PremiumDocumentCard name="RCA Insurance" daysRemaining={2} />
+            <PremiumDocumentCard name="ITP Inspection" daysRemaining={7} />
+            <PremiumDocumentCard name="Road Tax" daysRemaining={24} />
+        </View>
+
       </View>
     </View>
   );
@@ -126,7 +140,7 @@ function StatBubble({
   highlight?: boolean;
 }) {
   return (
-    <View className={`items-center ${!highlight ? "opacity-70" : ""}`}
+    <View className={`items-center ${!highlight ? "opacity-80" : ""}`}
     style={!highlight ? { marginTop: -12 } : undefined}>
       <View 
         className="w-20 h-20 rounded-full items-center justify-center bg-white"
