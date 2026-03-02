@@ -3,13 +3,18 @@ import { Plus } from "lucide-react-native";
 import { View } from "react-native";
 import { Text } from "@/components/ui/text";
 
-export default function DocumentsHeader({ onAdd }: { onAdd: () => void }) {
+type DocumentsHeaderProps = {
+  onAdd: () => void;
+  name: string;
+};
+
+export default function DocumentsHeader({ onAdd, name }: DocumentsHeaderProps) {
   return (
     <View className="flex-row justify-between items-center mb-4 px-1">
       
       {/* Title */}
       <Text className="text-[18px] font-bold text-gray-800 tracking-tight">
-        DOCUMENTS
+        {name}
       </Text>
 
       {/* Add Button */}

@@ -15,6 +15,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import PremiumDocumentCard from './documents';
 import DocumentsHeader from './documentHeader';
+import TopExpensesChart from './expensesChart';
 
 const { width } = Dimensions.get("window");
 const DARK_HEADER_HEIGHT = 180;
@@ -119,10 +120,21 @@ export default function Cars() {
         className="absolute w-full px-6"
         style={{ top: WHITE_CARD_HEIGHT + 80 }}
         >
-            <DocumentsHeader onAdd={() => console.log("Add document")} />
+            <DocumentsHeader onAdd={() => console.log("Add document")} name="My Documents" />
             <PremiumDocumentCard name="RCA Insurance" daysRemaining={2} />
             <PremiumDocumentCard name="ITP Inspection" daysRemaining={7} />
             <PremiumDocumentCard name="Road Tax" daysRemaining={24} />
+        </View>
+
+
+        <View
+          className="absolute w-full px-6"
+          style={{ top: WHITE_CARD_HEIGHT + 430, paddingBottom: 100 }}
+        >
+            <DocumentsHeader onAdd={() => console.log("Add expense")} name="My Expenses" />
+            
+            <TopExpensesChart />
+
         </View>
 
       </View>
