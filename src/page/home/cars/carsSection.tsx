@@ -1,15 +1,13 @@
 import { Platform, View, Dimensions } from "react-native";
 import StatBubble from "./statBubble";
 import { Path, Svg } from "react-native-svg";
-import { Image } from "@gluestack-ui/themed";
 
 const { width } = Dimensions.get("window");
 const WHITE_CARD_HEIGHT = 160;
-const DARK_HEADER_HEIGHT = -30;
 
 export default function CarsSection() {
   return (
-    <View style={{ height: WHITE_CARD_HEIGHT + 30, width: width }}>
+    <View style={{ height: WHITE_CARD_HEIGHT + 20, width: width }}>
       
       {/* 1. White card */}
       <View 
@@ -30,16 +28,6 @@ export default function CarsSection() {
               fill="#ffffff" 
             />
         </Svg>
-      </View>
-
-      {/* 2. Car avatar */}
-      <View className="absolute items-center" style={{ top: DARK_HEADER_HEIGHT - 50, width: width }}>
-        <View className="w-32 h-32 rounded-full border-4 border-white overflow-hidden bg-gray-200 shadow-lg">
-          <Image 
-            source={{ uri: "https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=500&q=80" }} 
-            className="w-full h-full" 
-          />
-        </View>
       </View>
 
       {/* 3. Cars */}

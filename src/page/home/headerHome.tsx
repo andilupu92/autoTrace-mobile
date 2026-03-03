@@ -5,13 +5,15 @@ import { Text } from "@/components/ui/text";
 import { View, TouchableOpacity, Dimensions } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { VStack } from "@/components/ui/vstack";
+import { Image } from "@gluestack-ui/themed";
 
 const { width } = Dimensions.get("window");
 const HEADER_HEIGHT = 180;
+const DARK_HEADER_HEIGHT = 150;
 
 export default function HeaderScreen({ openUserDetails }: { openUserDetails: () => void }) {
   return (
-    <View>
+    <View style={{ backgroundColor: "white" }}>
       {/* Orange curved header */}
       <Svg width={width} height={HEADER_HEIGHT}>
         <Path
@@ -44,6 +46,16 @@ export default function HeaderScreen({ openUserDetails }: { openUserDetails: () 
           </Avatar>
         </TouchableOpacity>
       </Box>
+
+      {/* 2. Car avatar */}
+      <View className="absolute items-center" style={{ top: DARK_HEADER_HEIGHT - 40, width: width, zIndex: 10 }}>
+        <View className="w-32 h-32 rounded-full border-4 border-white overflow-hidden bg-gray-200 shadow-lg">
+          <Image 
+            source={{ uri: "https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=500&q=80" }} 
+            className="w-full h-full" 
+          />
+        </View>
+      </View>
     </View>
   );
 }
