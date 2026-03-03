@@ -24,7 +24,7 @@ import { FormControl, FormControlError, FormControlErrorText } from "@/component
 import { Controller, useForm } from "react-hook-form";
 import { FloatingInput } from "@/components/ui/floating-input";
 import { FloatingSelect } from "@/components/ui/floating-select";
-import { carApi } from "@/src/api/services/carService";
+import { carApi } from "../../../api/services/carService";
 
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);

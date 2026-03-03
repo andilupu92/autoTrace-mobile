@@ -1,9 +1,9 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from "../page/auth/login";
-import HomeScreen from "../page/home/home";
+import HomeScreen from "../page/home/homeScreen";
 import ForgotPasswordScreen from '../page/auth/forgotPassword';
 import SignUpScreen from '../page/auth/signUp';
-import UserDetailsScreen from '../page/home/userDetails';
+import UserDetailsScreen from '../page/home/profile/userDetails';
 
 export type RootStackParamList = {
   Login: undefined;
