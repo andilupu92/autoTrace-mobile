@@ -15,12 +15,12 @@ export default function UserDetailsScreen() {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
     return (
-        <Box className="flex-1 bg-black/85">
+        <Box className="flex-1 bg-black/90">
 
             {/* 1. Backdrop Blur */}
             <BlurView 
-                intensity={95} 
-                tint="dark"
+                intensity={100} 
+                tint="light"
                 className="absolute inset-0"
             />
 
