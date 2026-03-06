@@ -42,6 +42,7 @@ export default function HeaderScreen({ openUserDetails }: { openUserDetails: () 
             <AvatarImage
               source={{ uri: "https://i.pravatar.cc/300" }}
               className="w-full h-full absolute inset-0"
+              alt="User Avatar"
             />
           </Avatar>
         </TouchableOpacity>
@@ -53,6 +54,7 @@ export default function HeaderScreen({ openUserDetails }: { openUserDetails: () 
           <Image 
             source={{ uri: "https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=500&q=80" }} 
             className="w-full h-full" 
+            alt="Car Avatar"
           />
         </View>
       </View>
