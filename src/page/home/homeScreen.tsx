@@ -8,8 +8,11 @@ import CarsSection from "./cars/carsSection";
 import HeaderSection from "./headerSection";
 import PremiumDocumentCard from "./documents/documents";
 import ExpensesChart from "./expensesChart";
+import { useState } from "react";
+import AddDocuments from "./documents/addDocuments";
 
 export default function HomeScreen() {
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
@@ -36,7 +39,7 @@ export default function HomeScreen() {
           <View>
             <HeaderSection
               name="My Documents"
-              onAdd={() => console.log("Add document")}
+              onAdd={() => setIsSheetOpen(true)}
             />
 
             <PremiumDocumentCard name="RCA Insurance" daysRemaining={2} />
@@ -53,6 +56,12 @@ export default function HomeScreen() {
           <ExpensesChart />
         </View>
       </ScrollView>
+
+      <AddDocuments
+        isVisible={isSheetOpen}
+        onClose={() => setIsSheetOpen(false)}
+      />
+
     </View>
   );
 }

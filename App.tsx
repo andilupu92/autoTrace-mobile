@@ -8,6 +8,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import '@/global.css';
 import { useEffect } from "react";
 import { useAuthStore } from "./src/store/authStore";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -39,10 +40,12 @@ export default function App() {
   }
 
   return (
-    <GluestackUIProvider mode={(colorScheme ?? "light") as "light" | "dark"}>
-      <NavigationContainer>
-        <AppNavigator />
-      </NavigationContainer>
-    </GluestackUIProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <GluestackUIProvider mode={(colorScheme ?? "light") as "light" | "dark"}>
+        <NavigationContainer>
+          <AppNavigator />
+        </NavigationContainer>
+      </GluestackUIProvider>
+    </GestureHandlerRootView>
   );
 }
