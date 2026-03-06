@@ -1,10 +1,10 @@
 import {
   View,
-  Text,
   Pressable,
   Dimensions,
   StyleSheet,
   Platform,
+  ActivityIndicator
 } from "react-native";
 import Animated, {
   useSharedValue,
@@ -16,8 +16,23 @@ import Animated, {
   Extrapolation,
   useAnimatedReaction,
 } from "react-native-reanimated";
+import { HStack } from '@/components/ui/hstack';
+import { Text } from '@/components/ui/text';
+import { Button, ButtonText } from '@/components/ui/button';
+import FloatingInput from '@/components/ui/floating-input';
+import { 
+  FormControl,
+  FormControlError, 
+  FormControlErrorText
+} from '@/components/ui/form-control';
+import { useForm, Controller } from "react-hook-form";
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { CalendarDaysIcon } from "lucide-react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { BlurView } from "expo-blur";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const SHEET_HEIGHT = SCREEN_HEIGHT * 0.52;
@@ -28,12 +43,46 @@ type Props = {
   onClose: () => void;
 };
 
+const documentSchema = z.object({
+  documentName: z
+    .string()
+    .min(1, 'Document is required')
+    .min(3, 'Minim 3 caractere'),
+  expiryDate: z
+    .date({ message: 'Data expirării este obligatorie' })
+    .min(new Date(), 'Data trebuie să fie în viitor'),
+});
+
+type DocumentFormData = z.infer<typeof documentSchema>;
+
 export default function AddDocuments({ isVisible, onClose }: Props) {
   const translateY = useSharedValue(SHEET_HEIGHT);
   const backdropOpacity = useSharedValue(0);
   const dragContext = useSharedValue(0);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [isLoading, setLoading] = useState(false);
 
-  // Reacționează la schimbarea prop-ului isVisible
+  const { control, handleSubmit, setValue, formState: { errors } } = useForm<DocumentFormData>({
+    resolver: zodResolver(documentSchema),
+  });
+
+  const onSubmit = async (data: DocumentFormData) => {
+      try {
+        console.log("Attempting document save...");
+        setLoading(true);
+  
+  
+        console.log("Document save Success for: ", data.documentName);
+      } catch (error: any) {
+        const errorMessage = error?.response?.data?.message 
+          || error?.message 
+          || 'An error occurred during document save';
+        console.error('Document save error:', errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useAnimatedReaction(
     () => isVisible,
     (visible) => {
@@ -148,27 +197,103 @@ export default function AddDocuments({ isVisible, onClose }: Props) {
           </View>
 
           {/* Conținut */}
-          <View className="flex-1 items-center justify-center px-6">
-            <Text className="text-2xl font-bold text-gray-800 tracking-tight">
-              Hello backdrop
-            </Text>
-            <Text className="text-sm text-gray-400 mt-2">
-              Trage în jos sau apasă în afară pentru a închide
-            </Text>
+          <View className="flex-1 px-5 pt-6 gap-5">
+
+            {/* --- NUME DOCUMENT --- */}
+            <FormControl isInvalid={!!errors.documentName}>
+              <Controller
+                control={control}
+                name="documentName"
+                render={({ field: { onChange, value, onBlur } }) => (
+                  <FloatingInput
+                    label="Nume document"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    isInvalid={!!errors.documentName}
+                    autoCapitalize="words"
+                  />
+                )}
+              />
+              <FormControlError>
+                <FormControlErrorText className="ml-2 mt-1 text-xs text-red-500">
+                  {errors.documentName?.message}
+                </FormControlErrorText>
+              </FormControlError>
+            </FormControl>
+
+            {/* --- DATA EXPIRARE --- */}
+            <FormControl isInvalid={!!errors.expiryDate}>
+              <Controller
+                control={control}
+                name="expiryDate"
+                render={({ field: { value } }) => (
+                  <>
+                    <Pressable
+                      onPress={() => setShowDatePicker(true)}
+                      className={`border rounded-2xl px-4 py-3.5 bg-gray-50 flex-row items-center justify-between
+                        ${errors.expiryDate ? 'border-red-500' : 'border-gray-200'}`}
+                    >
+                      <Text className={value ? 'text-base text-gray-900' : 'text-base text-gray-400'}>
+                        {value
+                          ? value.toLocaleDateString('ro-RO', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                          : 'Data expirare'}
+                      </Text>
+                      <CalendarDaysIcon
+                        size={20}
+                        color={errors.expiryDate ? '#ef4444' : '#9ca3af'}
+                      />
+                    </Pressable>
+
+                    {showDatePicker && (
+                      <DateTimePicker
+                        value={value ?? new Date()}
+                        mode="date"
+                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                        minimumDate={new Date()}
+                        onChange={(event, selectedDate) => {
+                          setShowDatePicker(Platform.OS === 'ios');
+                          if (selectedDate) {
+                            setValue('expiryDate', selectedDate, { shouldValidate: true });
+                          }
+                        }}
+                      />
+                    )}
+                  </>
+                )}
+              />
+              <FormControlError>
+                <FormControlErrorText className="ml-2 mt-1 text-xs text-red-500">
+                  {errors.expiryDate?.message}
+                </FormControlErrorText>
+              </FormControlError>
+            </FormControl>
+
           </View>
 
-          {/* CTA Button */}
+          {/* Save Button */}
           <View className="px-5 pb-8 pt-4">
-            <Pressable
-              onPress={closeSheet}
-              className="bg-orange-500 active:bg-orange-600 rounded-2xl py-4 items-center"
-              style={styles.ctaShadow}
+            <Button
+              size="xl"
+              className="bg-black dark:bg-blue-600 h-16 rounded-2xl shadow-lg shadow-gray-200 dark:shadow-none active:scale-[0.98]"
+              isDisabled={isLoading}
+              onPress={handleSubmit(onSubmit)}
             >
-              <Text className="text-white font-semibold text-base">
-                Confirm
-              </Text>
-            </Pressable>
+              <HStack space="md" className="items-center justify-center">
+                {isLoading ? (
+                  <ActivityIndicator
+                    size="small"
+                    color={Platform.OS === 'ios' ? undefined : '#FFFFFF'}
+                    className="text-white dark:text-blue-400 mr-2"
+                  />
+                ) : null}
+                <ButtonText className="font-bold dark:text-white text-lg">
+                  {isLoading ? 'Se salvează...' : 'Save'}
+                </ButtonText>
+              </HStack>
+            </Button>
           </View>
+
         </Animated.View>
       </GestureDetector>
     </>
