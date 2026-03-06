@@ -13,11 +13,17 @@ import AddDocuments from "./documents/addDocuments";
 
 export default function HomeScreen() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [editingDocument, setEditingDocument] = useState<string | null>(null)
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const openUserDetails = () => {
     navigation.navigate("UserDetails");
+  };
+
+  const handleEdit = (name: string) => {
+    setEditingDocument(name);
+    setIsSheetOpen(true);
   };
 
   return (
@@ -42,9 +48,9 @@ export default function HomeScreen() {
               onAdd={() => setIsSheetOpen(true)}
             />
 
-            <PremiumDocumentCard name="RCA Insurance" daysRemaining={2} />
-            <PremiumDocumentCard name="ITP Inspection" daysRemaining={7} />
-            <PremiumDocumentCard name="Road Tax" daysRemaining={24} />
+            <PremiumDocumentCard name="RCA Insurance" daysRemaining={2} onEdit={() => handleEdit("RCA Insurance")}/>
+            <PremiumDocumentCard name="ITP Inspection" daysRemaining={7} onEdit={() => handleEdit("ITP Inspection")}/>
+            <PremiumDocumentCard name="Road Tax" daysRemaining={24} onEdit={() => handleEdit("Road Tax")}/>
           </View>
         </View>
 
@@ -59,7 +65,7 @@ export default function HomeScreen() {
 
       <AddDocuments
         isVisible={isSheetOpen}
-        onClose={() => setIsSheetOpen(false)}
+        onClose={() => {setIsSheetOpen(false); setEditingDocument(null);}}
       />
 
     </View>
