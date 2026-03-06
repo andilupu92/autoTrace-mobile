@@ -114,6 +114,7 @@ export default function AddDocuments({ isVisible, onClose }: Props) {
           intensity={Platform.OS === "ios" ? 30 : 15}
           tint="light"
           style={StyleSheet.absoluteFillObject}
+          experimentalBlurMethod="dimezisBlurView"
         >
           <Pressable
             style={StyleSheet.absoluteFillObject}
