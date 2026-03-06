@@ -13,15 +13,17 @@ import { Ionicons } from "@expo/vector-icons";
 
 export default function PremiumDocumentCard({
   name,
+  expiryDate,
   daysRemaining,
   totalDays = 30,
   onEdit,
   onDelete,
 }: {
   name: string;
+  expiryDate: Date;
   daysRemaining: number;
   totalDays?: number;
-  onEdit?: () => void;
+  onEdit?: (data: { name: string; expiryDate: Date }) => void;
   onDelete?: () => void;
 }) {
   const progress = 1 - daysRemaining / totalDays;
@@ -79,7 +81,7 @@ export default function PremiumDocumentCard({
   const handleEdit = () => {
     swipeableRef.current?.close();
     setMenuVisible(false);
-    onEdit?.();
+    onEdit?.({ name, expiryDate });
   };
 
   const handleDelete = () => {

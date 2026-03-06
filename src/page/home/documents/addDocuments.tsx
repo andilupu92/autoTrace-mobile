@@ -33,6 +33,7 @@ import { BlurView } from "expo-blur";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
+import { useEffect } from "react";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const SHEET_HEIGHT = SCREEN_HEIGHT * 0.52;
@@ -41,6 +42,7 @@ const DRAG_CLOSE_THRESHOLD = SHEET_HEIGHT * 0.28;
 type Props = {
   isVisible: boolean;
   onClose: () => void;
+  initialData?: { name: string; expiryDate: Date } | null;
 };
 
 const documentSchema = z.object({
@@ -55,12 +57,13 @@ const documentSchema = z.object({
 
 type DocumentFormData = z.infer<typeof documentSchema>;
 
-export default function AddDocuments({ isVisible, onClose }: Props) {
+export default function AddDocuments({ isVisible, onClose, initialData }: Props) {
   const translateY = useSharedValue(SHEET_HEIGHT);
   const backdropOpacity = useSharedValue(0);
   const dragContext = useSharedValue(0);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [isLoading, setLoading] = useState(false);
+  const isEditing = !!initialData;
 
   const { control, handleSubmit, setValue, formState: { errors } } = useForm<DocumentFormData>({
     resolver: zodResolver(documentSchema),
@@ -82,6 +85,13 @@ export default function AddDocuments({ isVisible, onClose }: Props) {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (isVisible && initialData) {
+      setValue("documentName", initialData.name);
+      setValue("expiryDate", initialData.expiryDate);
+    }
+  }, [isVisible]);
 
   useAnimatedReaction(
     () => isVisible,
@@ -186,7 +196,7 @@ export default function AddDocuments({ isVisible, onClose }: Props) {
           {/* Header */}
           <View className="flex-row items-center justify-between px-5 pt-3 pb-4 border-b border-gray-100">
             <Text className="text-base font-semibold text-gray-900">
-              Add Document
+              {isEditing ? "Edit Document" : "Add Document"}
             </Text>
             <Pressable
               onPress={closeSheet}
@@ -288,7 +298,7 @@ export default function AddDocuments({ isVisible, onClose }: Props) {
                   />
                 ) : null}
                 <ButtonText className="font-bold dark:text-white text-lg">
-                  {isLoading ? 'Se salvează...' : 'Save'}
+                  {isLoading ? 'Se salvează...' : isEditing ? 'Update' : 'Save'}
                 </ButtonText>
               </HStack>
             </Button>

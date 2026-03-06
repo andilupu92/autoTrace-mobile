@@ -13,7 +13,7 @@ import AddDocuments from "./documents/addDocuments";
 
 export default function HomeScreen() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [editingDocument, setEditingDocument] = useState<string | null>(null)
+  const [editingData, setEditingData] = useState<{ name: string; expiryDate: Date } | null>(null);
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
@@ -21,8 +21,8 @@ export default function HomeScreen() {
     navigation.navigate("UserDetails");
   };
 
-  const handleEdit = (name: string) => {
-    setEditingDocument(name);
+  const handleEdit = (data: { name: string; expiryDate: Date }) => {
+    setEditingData(data);
     setIsSheetOpen(true);
   };
 
@@ -48,9 +48,9 @@ export default function HomeScreen() {
               onAdd={() => setIsSheetOpen(true)}
             />
 
-            <PremiumDocumentCard name="RCA Insurance" daysRemaining={2} onEdit={() => handleEdit("RCA Insurance")}/>
-            <PremiumDocumentCard name="ITP Inspection" daysRemaining={7} onEdit={() => handleEdit("ITP Inspection")}/>
-            <PremiumDocumentCard name="Road Tax" daysRemaining={24} onEdit={() => handleEdit("Road Tax")}/>
+            <PremiumDocumentCard name="RCA Insurance" daysRemaining={2} expiryDate={new Date("2026-03-08")} onEdit={handleEdit}/>
+            <PremiumDocumentCard name="ITP Inspection" daysRemaining={7} expiryDate={new Date("2026-03-15")} onEdit={handleEdit}/>
+            <PremiumDocumentCard name="Road Tax" daysRemaining={24} expiryDate={new Date("2026-03-30")} onEdit={handleEdit}/>
           </View>
         </View>
 
@@ -64,8 +64,13 @@ export default function HomeScreen() {
       </ScrollView>
 
       <AddDocuments
+        key={editingData ? editingData.name : "add"}
         isVisible={isSheetOpen}
-        onClose={() => {setIsSheetOpen(false); setEditingDocument(null);}}
+        initialData={editingData}
+        onClose={() => {
+          setIsSheetOpen(false);
+          setEditingData(null);
+        }}
       />
 
     </View>
