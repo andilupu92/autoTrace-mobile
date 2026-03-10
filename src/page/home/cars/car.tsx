@@ -2,7 +2,7 @@ import { Text } from "@/components/ui/text";
 import { View } from "react-native";
 
 
-export default function StatBubble({
+export default function Car({
   name,
   km,
   highlight = false,
@@ -12,7 +12,7 @@ export default function StatBubble({
   highlight?: boolean;
 }) {
   return (
-    <View className={`items-center ${!highlight ? "opacity-80" : ""}`}
+    <View className="items-center"
     style={!highlight ? { marginTop: -12 } : undefined}>
       <View 
         className="w-20 h-20 rounded-full items-center justify-center bg-white"

@@ -1,6 +1,6 @@
 import { Platform, View, Dimensions } from "react-native";
-import StatBubble from "./statBubble";
 import { Path, Svg } from "react-native-svg";
+import Car from "./car";
 
 const { width } = Dimensions.get("window");
 const WHITE_CARD_HEIGHT = 160;
@@ -32,9 +32,9 @@ export default function CarsSection() {
 
       {/* 3. Cars */}
       <View className="flex-row justify-between px-6" style={{ marginTop: 40 }}>
-        <StatBubble name="BMW X6" km="321.000 KM" />
-        <StatBubble name="Audi A5" km="120.000 KM" highlight />
-        <StatBubble name="Dacia 1300" km="400.000 KM" />
+        <Car name="BMW X6" km="321.000 KM" />
+        <Car name="Audi A5" km="120.000 KM" highlight />
+        <Car name="Dacia 1300" km="400.000 KM" />
       </View>
     </View>
   );

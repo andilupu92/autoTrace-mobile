@@ -11,7 +11,7 @@ import { Text } from "@/components/ui/text";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import { Ionicons } from "@expo/vector-icons";
 
-export default function PremiumDocumentCard({
+export default function DocumentCard({
   name,
   expiryDate,
   daysRemaining,
@@ -70,10 +70,10 @@ export default function PremiumDocumentCard({
 
   const getColors = () => {
     if (daysRemaining <= 3)
-      return { text: "text-red-600", badgeBg: "bg-red-50", progress: "#DC2626" };
+      return { text: "text-red-600", badgeBg: "bg-red-50", progress: "#DC2626", state: " - URGENT"};
     if (daysRemaining <= 10)
-      return { text: "text-amber-600", badgeBg: "bg-amber-50", progress: "#F59E0B" };
-    return { text: "text-emerald-600", badgeBg: "bg-emerald-50", progress: "#10B981" };
+      return { text: "text-amber-600", badgeBg: "bg-amber-50", progress: "#F59E0B", state: " - SOON" };
+    return { text: "text-emerald-600", badgeBg: "bg-emerald-50", progress: "#10B981", state: " - OK" };
   };
 
   const colors = getColors();
@@ -157,7 +157,7 @@ export default function PremiumDocumentCard({
             <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
               <View className={`${colors.badgeBg} px-3 py-1 rounded-full`}>
                 <Text className={`text-[12px] font-bold ${colors.text}`}>
-                  {daysRemaining} days
+                  {daysRemaining} days {colors.state}
                 </Text>
               </View>
 

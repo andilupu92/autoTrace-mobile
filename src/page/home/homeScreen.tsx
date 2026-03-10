@@ -3,13 +3,13 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/AppNavigator";
 import { View } from "react-native";
-import HeaderScreen from "./headerHome";
 import CarsSection from "./cars/carsSection";
-import HeaderSection from "./headerSection";
-import PremiumDocumentCard from "./documents/documents";
-import ExpensesChart from "./expensesChart";
+import HeaderSection from "../../utils/headerSection";
+import DocumentCard from "./documents/document";
+import ExpensesChart from "./expenses/expensesChart";
 import { useState } from "react";
 import AddDocuments from "./documents/addDocuments";
+import Header from "./header";
 
 export default function HomeScreen() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -29,7 +29,7 @@ export default function HomeScreen() {
   return (
     <View style={{ flex: 1 }}>
 
-      <HeaderScreen openUserDetails={openUserDetails} />
+      <Header openUserDetails={openUserDetails} />
 
       <ScrollView
         className="flex-1 bg-gray-150"
@@ -48,9 +48,9 @@ export default function HomeScreen() {
               onAdd={() => setIsSheetOpen(true)}
             />
 
-            <PremiumDocumentCard name="RCA Insurance" daysRemaining={2} expiryDate={new Date("2026-03-08")} onEdit={handleEdit}/>
-            <PremiumDocumentCard name="ITP Inspection" daysRemaining={7} expiryDate={new Date("2026-03-15")} onEdit={handleEdit}/>
-            <PremiumDocumentCard name="Road Tax" daysRemaining={24} expiryDate={new Date("2026-03-30")} onEdit={handleEdit}/>
+            <DocumentCard name="RCA Insurance" daysRemaining={2} expiryDate={new Date("2026-03-08")} onEdit={handleEdit}/>
+            <DocumentCard name="ITP Inspection" daysRemaining={7} expiryDate={new Date("2026-03-15")} onEdit={handleEdit}/>
+            <DocumentCard name="Road Tax" daysRemaining={24} expiryDate={new Date("2026-03-30")} onEdit={handleEdit}/>
           </View>
         </View>
 

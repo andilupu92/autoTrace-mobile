@@ -11,7 +11,7 @@ const { width } = Dimensions.get("window");
 const HEADER_HEIGHT = 180;
 const DARK_HEADER_HEIGHT = 150;
 
-export default function HeaderScreen({ openUserDetails }: { openUserDetails: () => void }) {
+export default function Header({ openUserDetails }: { openUserDetails: () => void }) {
   return (
     <View style={{ backgroundColor: "white" }}>
       {/* Orange curved header */}
