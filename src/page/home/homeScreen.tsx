@@ -41,7 +41,7 @@ export default function HomeScreen() {
           <CarsSection />
         </View>
 
-        <View className="px-6">
+        <View className="px-6 mt-12">
           <View>
             <HeaderSection
               name="My Documents"
@@ -54,7 +54,7 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        <View className="px-6 mt-10">
+        <View className="px-6 mt-5">
           <HeaderSection
             name="My Expenses"
             onAdd={() => console.log("Add expense")}
