@@ -130,7 +130,7 @@ export default function CarsSection({ onAddCar }: CarsSectionProps) {
           </Svg>
         </View>
         
-        <View className="mt-5">
+        <View className="mt-6">
           <HeaderSection 
               name="My Cars"
               onAdd={onAddCar}

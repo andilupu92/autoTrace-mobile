@@ -115,20 +115,14 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
               mass: 0.8,
             });
             backdropOpacity.value = withTiming(1, { duration: 320 });
-          } else {
-            translateY.value = withSpring(SHEET_HEIGHT, {
-              damping: 20,
-              stiffness: 200,
-            });
-            backdropOpacity.value = withTiming(0, { duration: 280 });
           }
         }
       );
     
       const closeSheet = () => {
-        translateY.value = withSpring(
+        translateY.value = withTiming(
           SHEET_HEIGHT,
-          { damping: 20, stiffness: 200 },
+          { duration: 280 },
           (finished) => {
             if (finished) runOnJS(onClose)();
           }
