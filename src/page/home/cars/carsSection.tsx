@@ -2,9 +2,7 @@ import {
   Platform,
   View,
   Dimensions,
-  Modal,
   Text,
-  Pressable,
 } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { Path, Svg } from "react-native-svg";
@@ -16,9 +14,9 @@ import Animated, {
   withSpring,
   runOnJS,
 } from "react-native-reanimated";
-import { Ionicons } from "@expo/vector-icons";
 import Car from "./car";
 import HeaderSection from "@/src/utils/headerSection";
+import AddCar from "./addCar";
 
 const { width } = Dimensions.get("window");
 const WHITE_CARD_HEIGHT = 160;
@@ -39,8 +37,10 @@ const INITIAL_CARS: CarItem[] = [
 export default function CarsSection() {
   const [cars, setCars]                 = useState<CarItem[]>(INITIAL_CARS);
   const [currentIndex, setCurrentIndex] = useState(1);
-  const [menuVisible, setMenuVisible]   = useState(false);
   const translateX = useSharedValue(0);
+  const [editingData, setEditingData] = useState<{ 
+    brand: string; model: string; kilometers: string; year: number } | null>(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const total = cars.length;
 
@@ -90,12 +90,10 @@ export default function CarsSection() {
   };
 
   const handleEdit = () => {
-    setMenuVisible(false);
     console.log("Edit:", cars[currentIndex]);
   };
 
   const handleDelete = () => {
-    setMenuVisible(false);
     if (total <= 1) return;
     const updated = cars.filter((_, i) => i !== currentIndex);
     setCars(updated);
@@ -131,7 +129,7 @@ export default function CarsSection() {
       <View className="mt-4">
         <HeaderSection 
             name="My Cars"
-            onAdd={handleAdd}
+            onAdd={() => console.log("Add Car")}
         />
       </View>
       <View>
@@ -151,6 +149,17 @@ export default function CarsSection() {
           {nextCar    && <Car name={nextCar.name}    km={nextCar.km} />}
         </Animated.View>
       </GestureDetector>
+
+      <AddCar
+        key={editingData ? editingData.brand : "add"}
+        isVisible={isSheetOpen}
+        initialData={editingData}
+        onClose={() => {
+          setIsSheetOpen(false);
+          setEditingData(null);
+        }}
+      />
+
     </View>
   );
 }

@@ -1,9 +1,11 @@
 import { useState } from "react";
 import {
-  TouchableOpacity,
   Platform,
   UIManager,
-  ActivityIndicator,
+  Dimensions,
+  View,
+  Pressable,
+  StyleSheet,
 } from "react-native";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,8 +18,10 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
   withTiming,
+  runOnJS,
   interpolate,
-  Easing,
+  Extrapolation,
+  useAnimatedReaction,
 } from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
 import { FormControl, FormControlError, FormControlErrorText } from "@/components/ui/form-control";
@@ -25,11 +29,23 @@ import { Controller, useForm } from "react-hook-form";
 import { FloatingInput } from "@/components/ui/floating-input";
 import { FloatingSelect } from "@/components/ui/floating-select";
 import { carApi } from "../../../api/services/carService";
+import { useEffect } from "react";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { BlurView } from "expo-blur";
 
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
+type Props = {
+  isVisible: boolean;
+  onClose: () => void;
+  initialData?: { brand: string; model: string; kilometers: string, year: number } | null;
+};
+
+const { height: SCREEN_HEIGHT } = Dimensions.get("window");
+const SHEET_HEIGHT = SCREEN_HEIGHT * 0.52;
+const DRAG_CLOSE_THRESHOLD = SHEET_HEIGHT * 0.28;
 const CAR_BRANDS = [
   { label: 'Volkswagen', value: 'volkswagen' },
   { label: 'BMW', value: 'bmw' },
@@ -45,11 +61,15 @@ const insertCarSchema = z.object({
 
 type InsertCarFormData = z.input<typeof insertCarSchema>;
 
-export default function AddCarCard() {
+export default function AddCar({ isVisible, onClose, initialData }: Props) {
+  const translateY = useSharedValue(SHEET_HEIGHT);
+  const backdropOpacity = useSharedValue(0);
+  const dragContext = useSharedValue(0);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setLoading] = useState(false);
+  const isEditing = !!initialData;
 
-  const { control, handleSubmit, formState: { errors } } = useForm<InsertCarFormData>({
+  const { control, handleSubmit, setValue, formState: { errors } } = useForm<InsertCarFormData>({
       resolver: zodResolver(insertCarSchema),
       defaultValues: { brand: "", model: "", year: 0, kilometers: 0 },
       mode: "onChange"
@@ -61,38 +81,6 @@ export default function AddCarCard() {
   const formScale = useSharedValue(0.97);
   const iconOpacity = useSharedValue(0);
 
-  const toggle = () => {
-    const opening = !isOpen;
-
-    rotation.value = withSpring(opening ? 1 : 0, { damping: 15, stiffness: 120 });
-    iconOpacity.value = withTiming(opening ? 1 : 0, { duration: 200 });
-
-    if (opening) {
-      formOpacity.value = withTiming(1, { duration: 280, easing: Easing.out(Easing.ease) });
-      formScale.value = withSpring(1, { damping: 14, stiffness: 100 });
-    } else {
-      formOpacity.value = withTiming(0, { duration: 180 });
-      formScale.value = withSpring(0.97, { damping: 14, stiffness: 100 });
-    }
-
-    setIsOpen(opening);
-  };
-
-  // Animated styles
-  const iconAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        rotate: `${interpolate(rotation.value, [0, 1], [0, 45])}deg`,
-      },
-    ],
-    opacity: iconOpacity.value,
-  }));
-
-  const formAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: formOpacity.value,
-    transform: [{ scale: formScale.value }],
-  }));
-
   const onSave = async (data: InsertCarFormData) => {
     try {
         setLoading(true);
@@ -101,7 +89,6 @@ export default function AddCarCard() {
 
         console.log("Vehicle registered successfully:", responseData);
 
-        toggle();
     } catch (error) {
         console.error("Error registering vehicle:", error);
     } finally {
@@ -109,212 +96,154 @@ export default function AddCarCard() {
     }
   };
 
+  useEffect(() => {
+      if (isVisible && initialData) {
+        setValue("brand", initialData.brand);
+        setValue("model", initialData.model);
+        setValue("year", initialData.year);
+        setValue("kilometers", initialData.kilometers);
+      }
+    }, [isVisible]);
+
+    useAnimatedReaction(
+        () => isVisible,
+        (visible) => {
+          if (visible) {
+            translateY.value = withSpring(0, {
+              damping: 22,
+              stiffness: 160,
+              mass: 0.8,
+            });
+            backdropOpacity.value = withTiming(1, { duration: 320 });
+          } else {
+            translateY.value = withSpring(SHEET_HEIGHT, {
+              damping: 20,
+              stiffness: 200,
+            });
+            backdropOpacity.value = withTiming(0, { duration: 280 });
+          }
+        }
+      );
+    
+      const closeSheet = () => {
+        translateY.value = withSpring(
+          SHEET_HEIGHT,
+          { damping: 20, stiffness: 200 },
+          (finished) => {
+            if (finished) runOnJS(onClose)();
+          }
+        );
+        backdropOpacity.value = withTiming(0, { duration: 280 });
+      };
+    
+      // Gesture de drag (swipe down pentru dismiss)
+      const panGesture = Gesture.Pan()
+        .onStart(() => {
+          dragContext.value = translateY.value;
+        })
+        .onUpdate((event) => {
+          const newY = dragContext.value + event.translationY;
+          translateY.value = Math.max(0, newY);
+    
+          backdropOpacity.value = interpolate(
+            translateY.value,
+            [0, SHEET_HEIGHT],
+            [1, 0],
+            Extrapolation.CLAMP
+          );
+        })
+        .onEnd((event) => {
+          if (
+            event.translationY > DRAG_CLOSE_THRESHOLD ||
+            event.velocityY > 500
+          ) {
+            runOnJS(closeSheet)();
+          } else {
+            translateY.value = withSpring(0, { damping: 22, stiffness: 160 });
+            backdropOpacity.value = withTiming(1, { duration: 200 });
+          }
+        });
+    
+      const animatedSheetStyle = useAnimatedStyle(() => ({
+        transform: [{ translateY: translateY.value }],
+      }));
+    
+      const animatedBackdropStyle = useAnimatedStyle(() => ({
+        opacity: backdropOpacity.value,
+      }));
+    
+      if (!isVisible) return null;
+
   return (
-    <Box style={{ alignItems: "center", paddingHorizontal: 16, marginVertical: 12 }}>
-      <Box
-        style={{
-          width: "100%",
-          borderRadius: 20,
-          overflow: "hidden",
-          backgroundColor: isOpen ? "#ffffff" : "transparent",
-          borderWidth: isOpen ? 0 : 1.5,
-          borderColor: "#cbd5e1",
-          borderStyle: "dashed",
-          shadowColor: "#64748b",
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: isOpen ? 0.1 : 0,
-          shadowRadius: 16,
-          elevation: isOpen ? 3 : 0,
-        }}
-      >
-        {/* Header Row — tappable */}
-        <TouchableOpacity
-          onPress={toggle}
-          activeOpacity={0.85}
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            paddingHorizontal: 20,
-            paddingVertical: 16,
-            minHeight: 64,
-          }}
-        >
-          {/* Left: icon + text */}
-          <Box style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-            <Box
-              className={`w-[38px] h-[38px] rounded-[12px] items-center justify-center ${
-                    isOpen ? "bg-blue-50" : "bg-slate-100"
-                }`}
-            >
-              <Ionicons
-                name="car-sport-outline"
-                size={20}
-                color={isOpen ? "#2563eb" : "#64748b"}
-              />
-            </Box>
-
-            <Box>
-              <Text className="font-bold text-[15px] text-slate-900 tracking-[-0.3px]">
-                {isOpen ? "New Vehicle" : "Add your car"}
-              </Text>
-              <Text style={{ fontSize: 12, color: "#94a3b8", marginTop: 1 }}>
-                {isOpen ? "Fill in the details below" : "Tap to register a vehicle"}
-              </Text>
-            </Box>
-          </Box>
-
-          {/* Animated rotate + icon — only visible when open */}
+    <>
+    {/* Blur backdrop */}
           <Animated.View
-            style={[
-              {
-                width: 32,
-                height: 32,
-                borderRadius: 10,
-                backgroundColor: "#eff6ff",
-                alignItems: "center",
-                justifyContent: "center",
-              },
-              iconAnimatedStyle,
-            ]}
+            style={[StyleSheet.absoluteFillObject, animatedBackdropStyle]}
+            pointerEvents="auto"
           >
-            <Ionicons name="add" size={20} color="#2563eb" />
-          </Animated.View>
-        </TouchableOpacity>
-
-        {/* Expanded Form */}
-        {isOpen && (
-          <Animated.View
-            style={[
-              { paddingHorizontal: 20, paddingBottom: 24 },
-              formAnimatedStyle,
-            ]}
-          >
-            {/* Divider */}
-            <Box style={{ height: 1, backgroundColor: "#f1f5f9", marginBottom: 20 }} />
-
-            {/* Brand */}
-            <FormControl className="mb-5" style={{ zIndex: 999 }} isInvalid={!!errors.brand}>
-                <Controller
-                    control={control}
-                    name="brand"
-                    render={({ field: { onChange, value } }) => (
-                    <FloatingSelect
-                        label="Brand"
-                        value={value}
-                        onValueChange={onChange}
-                        options={CAR_BRANDS}
-                        isInvalid={!!errors.brand}
-                    />
-                    )}
-                />
-                <FormControlError>
-                    <FormControlErrorText className="ml-2 mt-1 text-xs text-red-500">
-                        {errors.brand?.message}
-                    </FormControlErrorText>
-                </FormControlError>
-            </FormControl>
-
-            {/* Model Input */}
-            <FormControl className="mb-5" isInvalid={!!errors.model}>
-              <Controller
-                control={control}
-                name="model"
-                render={({ field: { onChange, value, onBlur } }) => (
-                  <FloatingInput
-                    label="Model"
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    keyboardType="default"
-                    autoCapitalize="none"
-                    isInvalid={!!errors.model}
-                  />
-                )}
-              />
-              <FormControlError>
-                <FormControlErrorText className="ml-2 mt-1 text-xs text-red-500">
-                  {errors.model?.message}
-                </FormControlErrorText>
-              </FormControlError>
-            </FormControl>
-
-            {/* Year Input */}
-            <FormControl className="mb-5" isInvalid={!!errors.year}>
-              <Controller
-                control={control}
-                name="year"
-                render={({ field: { onChange, value, onBlur } }) => (
-                  <FloatingInput
-                    label="Year"
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    keyboardType="numeric"
-                    autoCapitalize="none"
-                    isInvalid={!!errors.year}
-                  />
-                )}
-              />
-              <FormControlError>
-                <FormControlErrorText className="ml-2 mt-1 text-xs text-red-500">
-                  {errors.year?.message}
-                </FormControlErrorText>
-              </FormControlError>
-            </FormControl>
-
-            {/* Kilometers Input */}
-            <FormControl className="mb-5" isInvalid={!!errors.kilometers}>
-              <Controller
-                control={control}
-                name="kilometers"
-                render={({ field: { onChange, value, onBlur } }) => (
-                  <FloatingInput
-                    label="Kilometers"
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    keyboardType="numeric"
-                    autoCapitalize="none"
-                    isInvalid={!!errors.kilometers}
-                  />
-                )}
-              />
-              <FormControlError>
-                <FormControlErrorText className="ml-2 mt-1 text-xs text-red-500">
-                  {errors.kilometers?.message}
-                </FormControlErrorText>
-              </FormControlError>
-            </FormControl>
-
-            {/* Register Button */}
-            <Button 
-              size="xl" 
-              className="bg-black dark:bg-blue-600 h-16 rounded-2xl shadow-lg shadow-gray-200 dark:shadow-none active:scale-[0.98]" 
-              isDisabled={isLoading}
-              onPress={handleSubmit(onSave)}
+            <BlurView
+              intensity={Platform.OS === "ios" ? 30 : 15}
+              tint="light"
+              style={StyleSheet.absoluteFillObject}
+              experimentalBlurMethod="dimezisBlurView"
             >
-              <HStack space="md" className="items-center justify-center">
-                {isLoading ? (
-                  <ActivityIndicator
-                    size="small" 
-                    color={Platform.OS === 'ios' ? undefined : '#FFFFFF'} 
-                    className="text-white dark:text-blue-400 mr-2"
-                  />
-                ) : null}
-                <ButtonText className="font-bold dark:text-white text-lg">
-                  {isLoading ? 'Registering...' : 'Register Vehicle'}
-                </ButtonText>
-              </HStack>
-            </Button>
-
-            {/* Cancel */}
-            <TouchableOpacity onPress={toggle} style={{ alignItems: "center", paddingTop: 14 }}>
-              <Text style={{ color: "#94a3b8", fontSize: 13 }}>Cancel</Text>
-            </TouchableOpacity>
+              <Pressable
+                style={StyleSheet.absoluteFillObject}
+                onPress={closeSheet}
+              />
+            </BlurView>
           </Animated.View>
-        )}
-      </Box>
-    </Box>
+    
+          {/* Bottom Sheet */}
+          <GestureDetector gesture={panGesture}>
+            <Animated.View
+              style={[styles.sheet, animatedSheetStyle]}
+              className="bg-white"
+            >
+              {/* Handle indicator */}
+              <View className="items-center pt-3 pb-1">
+                <View className="w-10 h-[5px] bg-gray-200 rounded-full" />
+              </View>
+    
+              {/* Header */}
+              <View className="flex-row items-center justify-between px-5 pt-3 pb-4 border-b border-gray-100">
+                <Text className="text-base font-semibold text-gray-900">
+                  {isEditing ? "Edit Document" : "Add Document"}
+                </Text>
+                <Pressable
+                  onPress={closeSheet}
+                  className="w-8 h-8 items-center justify-center rounded-full bg-gray-100 active:bg-gray-200"
+                >
+                  <Text className="text-gray-500 text-sm font-medium">✕</Text>
+                </Pressable>
+              </View>
+        
+        </Animated.View>
+      </GestureDetector>
+    </>
   )
 }
+
+const styles = StyleSheet.create({
+  sheet: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: SHEET_HEIGHT,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+    elevation: 24,
+  },
+  ctaShadow: {
+    shadowColor: "#f97316",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+});

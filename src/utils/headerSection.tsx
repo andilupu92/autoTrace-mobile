@@ -9,6 +9,10 @@ type HeaderSectionProps = {
 };
 
 export default function HeaderSection({ onAdd, name }: HeaderSectionProps) {
+
+  onAdd = () => {
+    console.log("Add button pressed");
+  };
   return (
     <View className="flex-row justify-between items-center mb-4 px-1">
       
