@@ -6,14 +6,18 @@ export default function Car({
   name,
   km,
   highlight = false,
+  onEdit,
 }: {
   name: string;
   km: string;
   highlight?: boolean;
+  onEdit?: () => void;
 }) {
   return (
     <View className="items-center" style={!highlight ? { marginTop: -12 } : undefined}>
-      <View 
+      <TouchableOpacity 
+        activeOpacity={highlight ? 0.7 : 1}
+        onPress={highlight ? onEdit : undefined}
         className="w-20 h-20 rounded-full items-center justify-center bg-white"
         style={
           highlight 
@@ -37,7 +41,7 @@ export default function Car({
       >
         {/* Edit button */}
         {highlight && (
-          <TouchableOpacity 
+          <View 
             style={{ 
               position: 'absolute', 
               top: 7,
@@ -45,16 +49,15 @@ export default function Car({
               padding: 4,
               opacity: 0.3,
             }}
-            onPress={() => console.log("open sheet")}
           >
             <Ionicons name="pencil" size={44} color="#9CA3AF" />
-          </TouchableOpacity>
+          </View>
         )}
 
         <Text className={`font-bold text-center px-1 ${highlight ? "text-orange-500 text-[13px]" : "text-gray-400 text-[10px]"}`}>
           {name}
         </Text>
-      </View>
+      </TouchableOpacity>
       
       <Text className={`text-[10px] font-bold uppercase mt-3 tracking-tighter ${highlight ? "text-orange-400" : "text-gray-400"}`}>
         {km}

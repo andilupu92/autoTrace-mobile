@@ -19,6 +19,7 @@ import HeaderSection from "@/src/utils/headerSection";
 
 type CarsSectionProps = {
   onAddCar: () => void;
+  onEditCar: (data: { brand: string; model: string; kilometers: string; year: number }) => void;
 };
 
 const { width } = Dimensions.get("window");
@@ -29,15 +30,16 @@ type CarItem = {
   id: string;
   name: string;
   km: string;
+  year: number;
 };
 
 const INITIAL_CARS: CarItem[] = [
-  { id: "1", name: "BMW X6",     km: "321.000 KM" },
-  { id: "2", name: "Audi A5",    km: "120.000 KM" },
-  { id: "3", name: "Dacia 1300", km: "400.000 KM" },
+  { id: "1", name: "BMW X6",     km: "321.000 KM", year: 2020 },
+  { id: "2", name: "Audi A5",    km: "120.000 KM", year: 2019 },
+  { id: "3", name: "Dacia 1300", km: "400.000 KM", year: 1975 },
 ];
 
-export default function CarsSection({ onAddCar }: CarsSectionProps) {
+export default function CarsSection({ onAddCar, onEditCar }: CarsSectionProps) {
   const [cars, setCars]                 = useState<CarItem[]>(INITIAL_CARS);
   const [currentIndex, setCurrentIndex] = useState(1);
   const translateX = useSharedValue(0);
@@ -81,26 +83,15 @@ export default function CarsSection({ onAddCar }: CarsSectionProps) {
     transform: [{ translateX: translateX.value }],
   }));
 
-  const handleAdd = () => {
-    const newCar: CarItem = {
-      id: Date.now().toString(),
-      name: "New Car",
-      km: "0 KM",
-    };
-    const updated = [...cars, newCar];
-    setCars(updated);
-    setCurrentIndex(updated.length - 1);
-  };
-
   const handleEdit = () => {
-    console.log("Edit:", cars[currentIndex]);
-  };
-
-  const handleDelete = () => {
-    if (total <= 1) return;
-    const updated = cars.filter((_, i) => i !== currentIndex);
-    setCars(updated);
-    setCurrentIndex((prev) => Math.min(prev, updated.length - 1));
+    const car = cars[currentIndex];
+    const [brand, ...rest] = car.name.split(" ");
+    onEditCar({
+      brand,
+      model: rest.join(" "),
+      kilometers: car.km.replace(/[^0-9]/g, ""),
+      year: car.year,
+    });
   };
 
   const [prevCar, currentCar, nextCar] = getVisibleCars(currentIndex);
@@ -130,14 +121,14 @@ export default function CarsSection({ onAddCar }: CarsSectionProps) {
           </Svg>
         </View>
         
-        <View className="mt-6">
+        <View className="mt-5">
           <HeaderSection 
               name="My Cars"
               onAdd={onAddCar}
           />
         </View>
         <View>
-          <Text className="text-gray-500 text-sm text-center">
+          <Text className="text-gray-500 text-md text-center">
             You have <Text className="font-bold text-green-500">{total}</Text> {total === 1 ? "car" : "cars"} in your garage.
           </Text>
         </View>
@@ -149,7 +140,7 @@ export default function CarsSection({ onAddCar }: CarsSectionProps) {
             className="flex-row justify-between px-6"
           >
             {prevCar    && <Car name={prevCar.name}    km={prevCar.km} />}
-            {currentCar && <Car name={currentCar.name} km={currentCar.km} highlight />}
+            {currentCar && <Car name={currentCar.name} km={currentCar.km} highlight onEdit={handleEdit}/>}
             {nextCar    && <Car name={nextCar.name}    km={nextCar.km} />}
           </Animated.View>
         </GestureDetector>

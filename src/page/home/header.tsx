@@ -49,7 +49,7 @@ export default function Header({ openUserDetails }: { openUserDetails: () => voi
       </Box>
 
       {/* 2. Car avatar */}
-      <View className="absolute items-center" style={{ top: DARK_HEADER_HEIGHT - 45, width: width, zIndex: 10 }}>
+      <View className="absolute items-center" style={{ top: DARK_HEADER_HEIGHT - 50, width: width, zIndex: 10 }}>
         <View className="w-32 h-32 rounded-full border-4 border-white overflow-hidden bg-gray-200 shadow-lg">
           <Image 
             source={{ uri: "https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=500&q=80" }} 

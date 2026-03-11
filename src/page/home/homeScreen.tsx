@@ -24,9 +24,14 @@ export default function HomeScreen() {
     navigation.navigate("UserDetails");
   };
 
-  const handleEdit = (data: { name: string; expiryDate: Date }) => {
+  const handleEditDoc = (data: { name: string; expiryDate: Date }) => {
     setEditingDocData(data);
     setIsSheetDocOpen(true);
+  };
+
+  const handleEditCar = (data: { brand: string; model: string; kilometers: string; year: number }) => {
+    setEditingCarData(data);
+    setIsSheetCarOpen(true);
   };
 
   return (
@@ -41,7 +46,7 @@ export default function HomeScreen() {
       >
 
        <View className="mt-4">
-          <CarsSection onAddCar={() => setIsSheetCarOpen(true)} />
+          <CarsSection onAddCar={() => setIsSheetCarOpen(true)} onEditCar={handleEditCar} />
         </View>
 
         <View className="px-6 mt-12">
@@ -51,9 +56,9 @@ export default function HomeScreen() {
               onAdd={() => setIsSheetDocOpen(true)}
             />
 
-            <DocumentCard name="RCA Insurance" daysRemaining={2} expiryDate={new Date("2026-03-08")} onEdit={handleEdit}/>
-            <DocumentCard name="ITP Inspection" daysRemaining={7} expiryDate={new Date("2026-03-15")} onEdit={handleEdit}/>
-            <DocumentCard name="Road Tax" daysRemaining={24} expiryDate={new Date("2026-03-30")} onEdit={handleEdit}/>
+            <DocumentCard name="RCA Insurance" daysRemaining={2} expiryDate={new Date("2026-03-08")} onEdit={handleEditDoc}/>
+            <DocumentCard name="ITP Inspection" daysRemaining={7} expiryDate={new Date("2026-03-15")} onEdit={handleEditDoc}/>
+            <DocumentCard name="Road Tax" daysRemaining={24} expiryDate={new Date("2026-03-30")} onEdit={handleEditDoc}/>
           </View>
         </View>
 
@@ -67,6 +72,7 @@ export default function HomeScreen() {
       </ScrollView>
 
       <AddCar
+        key={editingCarData ? `car-${editingCarData.brand}-${Date.now()}` : "car-add"}
         isVisible={isSheetCarOpen}
         initialData={editingCarData}
         onClose={() => {
@@ -76,7 +82,7 @@ export default function HomeScreen() {
       />
 
       <AddDocuments
-        key={editingDocData ? editingDocData.name : "add"}
+        key={editingDocData ? `doc-${editingDocData.name}-${Date.now()}` : "doc-add"}
         isVisible={isSheetDocOpen}
         initialData={editingDocData}
         onClose={() => {
