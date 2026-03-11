@@ -208,7 +208,7 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
               {/* Header */}
               <View className="flex-row items-center justify-between px-5 pt-3 pb-4 border-b border-gray-100">
                 <Text className="text-base font-semibold text-gray-900">
-                  {isEditing ? "Edit Document" : "Add Document"}
+                  {isEditing ? "Edit Car" : "Add Car"}
                 </Text>
                 <Pressable
                   onPress={closeSheet}

@@ -16,7 +16,10 @@ import Animated, {
 } from "react-native-reanimated";
 import Car from "./car";
 import HeaderSection from "@/src/utils/headerSection";
-import AddCar from "./addCar";
+
+type CarsSectionProps = {
+  onAddCar: () => void;
+};
 
 const { width } = Dimensions.get("window");
 const WHITE_CARD_HEIGHT = 160;
@@ -34,7 +37,7 @@ const INITIAL_CARS: CarItem[] = [
   { id: "3", name: "Dacia 1300", km: "400.000 KM" },
 ];
 
-export default function CarsSection() {
+export default function CarsSection({ onAddCar }: CarsSectionProps) {
   const [cars, setCars]                 = useState<CarItem[]>(INITIAL_CARS);
   const [currentIndex, setCurrentIndex] = useState(1);
   const translateX = useSharedValue(0);
@@ -103,63 +106,54 @@ export default function CarsSection() {
   const [prevCar, currentCar, nextCar] = getVisibleCars(currentIndex);
 
   return (
-    <View style={{ width, height: WHITE_CARD_HEIGHT + 20 }} className="px-6">
+    <View style={{ flex: 1 }}>
+      <View style={{ width, height: WHITE_CARD_HEIGHT + 20 }} className="px-6">
 
-      {/* ── White curved card ── */}
-      <View
-        className="absolute"
-        style={{
-          marginTop: -40,
-          zIndex: -1,
-          width,
-          ...Platform.select({
-            ios:     { shadowColor: "#000", shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 10 },
-            android: { elevation: 8 },
-          }),
-        }}
-      >
-        <Svg width={width} height={WHITE_CARD_HEIGHT} viewBox={`0 0 ${width} ${WHITE_CARD_HEIGHT}`}>
-          <Path
-            d={`M0 0 H${width} V${WHITE_CARD_HEIGHT - 40} Q${width / 2} ${WHITE_CARD_HEIGHT + 40} 0 ${WHITE_CARD_HEIGHT - 40} Z`}
-            fill="#ffffff"
-          />
-        </Svg>
-      </View>
-      
-      <View className="mt-4">
-        <HeaderSection 
-            name="My Cars"
-            onAdd={() => console.log("Add Car")}
-        />
-      </View>
-      <View>
-        <Text className="text-gray-500 text-sm text-center">
-          You have <Text className="font-bold text-green-500">{total}</Text> {total === 1 ? "car" : "cars"} in your garage.
-        </Text>
-      </View>
-
-      {/* ── Cars carousel ── */}
-      <GestureDetector gesture={pan}>
-        <Animated.View
-          style={[animatedStyle, { marginTop: 20 }]}
-          className="flex-row justify-between px-6"
+        {/* ── White curved card ── */}
+        <View
+          className="absolute"
+          style={{
+            marginTop: -40,
+            zIndex: -1,
+            width,
+            ...Platform.select({
+              ios:     { shadowColor: "#000", shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 10 },
+              android: { elevation: 8 },
+            }),
+          }}
         >
-          {prevCar    && <Car name={prevCar.name}    km={prevCar.km} />}
-          {currentCar && <Car name={currentCar.name} km={currentCar.km} highlight />}
-          {nextCar    && <Car name={nextCar.name}    km={nextCar.km} />}
-        </Animated.View>
-      </GestureDetector>
+          <Svg width={width} height={WHITE_CARD_HEIGHT} viewBox={`0 0 ${width} ${WHITE_CARD_HEIGHT}`}>
+            <Path
+              d={`M0 0 H${width} V${WHITE_CARD_HEIGHT - 40} Q${width / 2} ${WHITE_CARD_HEIGHT + 40} 0 ${WHITE_CARD_HEIGHT - 40} Z`}
+              fill="#ffffff"
+            />
+          </Svg>
+        </View>
+        
+        <View className="mt-5">
+          <HeaderSection 
+              name="My Cars"
+              onAdd={onAddCar}
+          />
+        </View>
+        <View>
+          <Text className="text-gray-500 text-sm text-center">
+            You have <Text className="font-bold text-green-500">{total}</Text> {total === 1 ? "car" : "cars"} in your garage.
+          </Text>
+        </View>
 
-      <AddCar
-        key={editingData ? editingData.brand : "add"}
-        isVisible={isSheetOpen}
-        initialData={editingData}
-        onClose={() => {
-          setIsSheetOpen(false);
-          setEditingData(null);
-        }}
-      />
-
+        {/* ── Cars carousel ── */}
+        <GestureDetector gesture={pan}>
+          <Animated.View
+            style={[animatedStyle, { marginTop: 20 }]}
+            className="flex-row justify-between px-6"
+          >
+            {prevCar    && <Car name={prevCar.name}    km={prevCar.km} />}
+            {currentCar && <Car name={currentCar.name} km={currentCar.km} highlight />}
+            {nextCar    && <Car name={nextCar.name}    km={nextCar.km} />}
+          </Animated.View>
+        </GestureDetector>
+      </View>
     </View>
   );
 }

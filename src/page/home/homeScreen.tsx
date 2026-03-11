@@ -10,10 +10,13 @@ import ExpensesChart from "./expenses/expensesChart";
 import { useState } from "react";
 import AddDocuments from "./documents/addDocuments";
 import Header from "./header";
+import AddCar from "./cars/addCar";
 
 export default function HomeScreen() {
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [editingData, setEditingData] = useState<{ name: string; expiryDate: Date } | null>(null);
+  const [isSheetDocOpen, setIsSheetDocOpen] = useState(false);
+  const [isSheetCarOpen, setIsSheetCarOpen] = useState(false);
+  const [editingDocData, setEditingDocData] = useState<{ name: string; expiryDate: Date } | null>(null);
+  const [editingCarData, setEditingCarData] = useState<{ brand: string; model: string; kilometers: string; year: number } | null>(null);
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
@@ -22,8 +25,8 @@ export default function HomeScreen() {
   };
 
   const handleEdit = (data: { name: string; expiryDate: Date }) => {
-    setEditingData(data);
-    setIsSheetOpen(true);
+    setEditingDocData(data);
+    setIsSheetDocOpen(true);
   };
 
   return (
@@ -38,14 +41,14 @@ export default function HomeScreen() {
       >
 
        <View className="mt-4">
-          <CarsSection />
+          <CarsSection onAddCar={() => setIsSheetCarOpen(true)} />
         </View>
 
         <View className="px-6 mt-12">
           <View>
             <HeaderSection
               name="My Documents"
-              onAdd={() => setIsSheetOpen(true)}
+              onAdd={() => setIsSheetDocOpen(true)}
             />
 
             <DocumentCard name="RCA Insurance" daysRemaining={2} expiryDate={new Date("2026-03-08")} onEdit={handleEdit}/>
@@ -63,13 +66,22 @@ export default function HomeScreen() {
         </View>
       </ScrollView>
 
-      <AddDocuments
-        key={editingData ? editingData.name : "add"}
-        isVisible={isSheetOpen}
-        initialData={editingData}
+      <AddCar
+        isVisible={isSheetCarOpen}
+        initialData={editingCarData}
         onClose={() => {
-          setIsSheetOpen(false);
-          setEditingData(null);
+          setIsSheetCarOpen(false);
+          setEditingCarData(null);
+        }}
+      />
+
+      <AddDocuments
+        key={editingDocData ? editingDocData.name : "add"}
+        isVisible={isSheetDocOpen}
+        initialData={editingDocData}
+        onClose={() => {
+          setIsSheetDocOpen(false);
+          setEditingDocData(null);
         }}
       />
 
