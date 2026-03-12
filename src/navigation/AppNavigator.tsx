@@ -4,6 +4,7 @@ import HomeScreen from "../page/home/homeScreen";
 import ForgotPasswordScreen from '../page/auth/forgotPassword';
 import SignUpScreen from '../page/auth/signUp';
 import UserDetailsScreen from '../page/home/profile/userDetails';
+import AllDocumentsScreen from '../page/home/documents/allDocuments';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -11,6 +12,7 @@ export type RootStackParamList = {
   ForgotPassword: undefined;
   SignUp: undefined;
   UserDetails: undefined;
+  AllDocuments: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -18,7 +20,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
     return (
-      <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: true }}>
+      <Stack.Navigator initialRouteName="Home" screenOptions={{ headerShown: true }}>
         {/*{isAuthenticated ? (
           <>*/}
             <Stack.Screen name="SignUp" component={SignUpScreen} options={{ headerShown: false }} />
@@ -29,6 +31,7 @@ export default function AppNavigator() {
           <>*/}
             <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
             <Stack.Screen name="UserDetails" component={UserDetailsScreen} options={{ presentation: 'transparentModal', headerShown: false, animation: 'fade', contentStyle: { backgroundColor: 'transparent' } }} />
+            <Stack.Screen name="AllDocuments" component={AllDocumentsScreen} options={{ headerShown: false }} />
           {/*</>
         )}*/}
         </Stack.Navigator>

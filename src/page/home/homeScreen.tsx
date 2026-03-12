@@ -1,8 +1,9 @@
-import { ScrollView } from "react-native";
+import { Pressable, ScrollView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/AppNavigator";
 import { View } from "react-native";
+import { Text } from '@/components/ui/text';
 import CarsSection from "./cars/carsSection";
 import HeaderSection from "../../utils/headerSection";
 import DocumentCard from "./documents/document";
@@ -34,6 +35,10 @@ export default function HomeScreen() {
     setIsSheetCarOpen(true);
   };
 
+  const handleViewAllDocuments = () => {
+    navigation.navigate("AllDocuments"); 
+  };
+
   return (
     <View style={{ flex: 1 }}>
 
@@ -59,6 +64,16 @@ export default function HomeScreen() {
             <DocumentCard name="RCA Insurance" daysRemaining={2} expiryDate={new Date("2026-03-08")} onEdit={handleEditDoc}/>
             <DocumentCard name="ITP Inspection" daysRemaining={7} expiryDate={new Date("2026-03-15")} onEdit={handleEditDoc}/>
             <DocumentCard name="Road Tax" daysRemaining={24} expiryDate={new Date("2026-03-30")} onEdit={handleEditDoc}/>
+          
+            <Pressable 
+              onPress={handleViewAllDocuments}
+              className="mt-4 bg-white py-2 px-6 rounded-full self-center shadow-sm flex-row items-center justify-center border border-gray-100"
+            >
+              <Text className="text-orange-500 font-medium text-sm">
+                Vezi toate documentele
+              </Text>
+            </Pressable>
+
           </View>
         </View>
 
