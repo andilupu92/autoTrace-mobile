@@ -5,6 +5,7 @@ import ForgotPasswordScreen from '../page/auth/forgotPassword';
 import SignUpScreen from '../page/auth/signUp';
 import UserDetailsScreen from '../page/home/profile/userDetails';
 import AllDocumentsScreen from '../page/home/documents/allDocuments';
+import AllExpensesScreen from '../page/home/expenses/allExpenses';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -13,6 +14,7 @@ export type RootStackParamList = {
   SignUp: undefined;
   UserDetails: undefined;
   AllDocuments: undefined;
+  AllExpenses: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -32,6 +34,7 @@ export default function AppNavigator() {
             <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
             <Stack.Screen name="UserDetails" component={UserDetailsScreen} options={{ presentation: 'transparentModal', headerShown: false, animation: 'fade', contentStyle: { backgroundColor: 'transparent' } }} />
             <Stack.Screen name="AllDocuments" component={AllDocumentsScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="AllExpenses" component={AllExpensesScreen} options={{ headerShown: false }}/>
           {/*</>
         )}*/}
         </Stack.Navigator>
