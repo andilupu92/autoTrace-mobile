@@ -12,10 +12,12 @@ import { useState } from "react";
 import AddDocuments from "./documents/addDocuments";
 import Header from "./header";
 import AddCar from "./cars/addCar";
+import AddExpenses from "./expenses/addExpenses";
 
 export default function HomeScreen() {
   const [isSheetDocOpen, setIsSheetDocOpen] = useState(false);
   const [isSheetCarOpen, setIsSheetCarOpen] = useState(false);
+  const [isSheetExpensesOpen, setIsSheetExpensesOpen] = useState(false);
   const [editingDocData, setEditingDocData] = useState<{ name: string; expiryDate: Date } | null>(null);
   const [editingCarData, setEditingCarData] = useState<{ brand: string; model: string; kilometers: string; year: number } | null>(null);
   const navigation =
@@ -80,7 +82,7 @@ export default function HomeScreen() {
         <View className="px-6 mt-5">
           <HeaderSection
             name="My Expenses"
-            onAdd={() => console.log("Add expense")}
+            onAdd={() => setIsSheetExpensesOpen(true)}
           />
           <ExpensesChart />
         </View>
@@ -103,6 +105,13 @@ export default function HomeScreen() {
         onClose={() => {
           setIsSheetDocOpen(false);
           setEditingDocData(null);
+        }}
+      />
+
+      <AddExpenses
+        isVisible={isSheetExpensesOpen}
+        onClose={() => {
+          setIsSheetExpensesOpen(false);
         }}
       />
 
