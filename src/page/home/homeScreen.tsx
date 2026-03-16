@@ -63,10 +63,10 @@ export default function HomeScreen() {
               onAdd={() => setIsSheetDocOpen(true)}
             />
 
-            <DocumentCard name="RCA Insurance" daysRemaining={2} expiryDate={new Date("2026-03-08")} onEdit={handleEditDoc}/>
-            <DocumentCard name="ITP Inspection" daysRemaining={7} expiryDate={new Date("2026-03-15")} onEdit={handleEditDoc}/>
-            <DocumentCard name="Road Tax" daysRemaining={24} expiryDate={new Date("2026-03-30")} onEdit={handleEditDoc}/>
-          
+            <DocumentCard icon="🚗" iconBg="#FFF3EB" name="RCA Insurance" daysRemaining={2} expiryDate={new Date("2026-03-18")} onEdit={handleEditDoc}/>
+            <DocumentCard icon="🔍" iconBg="#F0FDF4" name="ITP Inspection" daysRemaining={7} expiryDate={new Date("2026-03-21")} onEdit={handleEditDoc}/>
+            <DocumentCard icon="🛣️" iconBg="#FEF3C7" name="Road Tax" daysRemaining={24} expiryDate={new Date("2026-03-30")} onEdit={handleEditDoc}/>
+
             <Pressable 
               onPress={handleViewAllDocuments}
               className="mt-4 bg-white py-2 px-6 rounded-full self-center shadow-sm flex-row items-center justify-center border border-gray-100"

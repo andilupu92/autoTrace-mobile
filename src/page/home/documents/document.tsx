@@ -10,8 +10,14 @@ import { View, Pressable, Alert, Modal } from "react-native";
 import { Text } from "@/components/ui/text";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import { Ionicons } from "@expo/vector-icons";
+import { VStack } from "@/components/ui/vstack";
+import AnimatedProgressBar from "@/src/utils/animatedProgressBar";
+import { HStack } from "@/components/ui/hstack";
+import { Box } from "@/components/ui/box";
 
 export default function DocumentCard({
+  icon,
+  iconBg,
   name,
   expiryDate,
   daysRemaining,
@@ -19,6 +25,8 @@ export default function DocumentCard({
   onEdit,
   onDelete,
 }: {
+  icon: string;
+  iconBg: string;
   name: string;
   expiryDate: Date;
   daysRemaining: number;
@@ -26,7 +34,7 @@ export default function DocumentCard({
   onEdit?: (data: { name: string; expiryDate: Date }) => void;
   onDelete?: () => void;
 }) {
-  const progress = 1 - daysRemaining / totalDays;
+  const progress = totalDays - daysRemaining;
   const progressWidth = useSharedValue(0);
   const pulse = useSharedValue(1);
 
@@ -146,13 +154,24 @@ export default function DocumentCard({
         overshootRight={false}
         onSwipeableOpen={() => setMenuVisible(false)}
       >
-        <View style={{ backgroundColor: "white", borderRadius: 20, padding: 18 }}>
+        <Box className="bg-white rounded-2xl overflow-hidden shadow-sm shadow-black/5">
 
           {/* Header */}
-          <View className="flex-row justify-between items-center mb-4">
-            <Text className="text-[15px] font-semibold text-gray-800">
-              {name}
-            </Text>
+          <HStack className="items-center gap-3.5 px-4 pt-4 pb-2.5">
+            <View
+              style={{ backgroundColor: iconBg }}
+              className="w-12 h-12 rounded-2xl items-center justify-center"
+            >
+              <Text className="text-2xl">{icon}</Text>
+            </View>
+            <VStack className="flex-1 gap-0">
+              <Text className="text-[15px] font-semibold text-gray-800">
+                {name}
+              </Text>
+              <Text className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                29 Mar 2026
+              </Text>
+            </VStack>
 
             <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
               <View className={`${colors.badgeBg} px-3 py-1 rounded-full`}>
@@ -170,19 +189,14 @@ export default function DocumentCard({
                 <Ionicons name="ellipsis-vertical" size={16} color="#AAAAAA" />
               </Pressable>
             </View>
-          </View>
+          </HStack>
 
-          {/* Progress Track */}
-          <View className="h-2 bg-gray-100 rounded-full overflow-hidden">
-            <Animated.View
-              style={[
-                animatedProgress,
-                { height: 8, backgroundColor: colors.progress, borderRadius: 999 },
-              ]}
-            />
-          </View>
+          {/* ── Progress bar ── */}
+          <HStack className="items-center gap-2.5 px-4 pb-5">
+            <AnimatedProgressBar pct={progress} color={colors.progress} />
+          </HStack>
 
-        </View>
+        </Box>
       </Swipeable>
 
       <Modal

@@ -41,36 +41,48 @@ export default function AllDocumentsScreen() {
       >
         <View className="mt-2 flex-col gap-4">
           <DocumentCard 
+            icon="⛽"
+            iconBg= "#FFF3EB"
             name="RCA Insurance" 
             daysRemaining={2} 
             expiryDate={new Date("2026-03-14")} 
             onEdit={handleEditDoc}
           />
           <DocumentCard 
+            icon="🛠️"
+            iconBg="#F3F4F6"
             name="ITP Inspection" 
             daysRemaining={7} 
             expiryDate={new Date("2026-03-19")} 
             onEdit={handleEditDoc}
           />
           <DocumentCard 
+            icon="🛣️"
+            iconBg="#F3F4F6"
             name="Road Tax" 
             daysRemaining={24} 
             expiryDate={new Date("2026-04-05")} 
             onEdit={handleEditDoc}
           />
           <DocumentCard 
+            icon="⛽"
+            iconBg="#FFF3EB"
             name="Casco Insurance" 
             daysRemaining={145} 
             expiryDate={new Date("2026-08-04")} 
             onEdit={handleEditDoc}
           />
           <DocumentCard 
+            icon="🎫"
+            iconBg="#F3F4F6"
             name="Vignette (Rovinietă)" 
             daysRemaining={210} 
             expiryDate={new Date("2026-10-08")} 
             onEdit={handleEditDoc}
           />
           <DocumentCard 
+            icon="⚕️"
+            iconBg="#F3F4F6"
             name="Medical Kit" 
             daysRemaining={400} 
             expiryDate={new Date("2027-04-16")} 
