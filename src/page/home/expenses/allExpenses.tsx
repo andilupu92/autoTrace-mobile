@@ -2,7 +2,6 @@ import { View, Text, ScrollView, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { VStack } from "@/components/ui/vstack";
 import ExpenseCategory from "./expenseCategory";
 import ExpenseSummaryCard from "./expenseSummary";
@@ -12,7 +11,6 @@ export default function AllExpensesScreen() {
   const theme = { backArrowColor: "#F97316" };
 
   const totalAmount = "2.650 RON";
-  const totalCategories = 6;
   const currentMonth = "MARTIE 2025";
 
   const CATEGORIES = [
