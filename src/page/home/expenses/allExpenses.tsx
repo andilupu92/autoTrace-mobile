@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { VStack } from "@/components/ui/vstack";
 import ExpenseCategory from "./expenseCategory";
+import ExpenseSummaryCard from "./expenseSummary";
 
 export default function AllExpensesScreen() {
   const navigation = useNavigation();
@@ -26,7 +27,7 @@ export default function AllExpensesScreen() {
     },
     {
       rank: 2, icon: "🔧", iconBg: "#F3F4F6", name: "Service & Piese",
-      budgetPct: 40, barColor: "#9CA3AF", pctColor: "#6B7280",
+      budgetPct: 53, barColor: "#9CA3AF", pctColor: "#6B7280",
       initialTransactions: [
         { name: "Auto Total Service",  date: "15 Mar 2025", amount: 250 },
         { name: "Piese Auto Dedeman",  date: "01 Mar 2025", amount: 200 },
@@ -79,48 +80,13 @@ export default function AllExpensesScreen() {
         showsVerticalScrollIndicator={false}
       >
 
-        <View className="rounded-3xl overflow-hidden mb-6"
-            style={{
-                shadowColor: "#F97316",
-                shadowOffset: { width: 0, height: 8 },
-                shadowOpacity: 0.35,
-                shadowRadius: 12,
-                elevation: 8,
-            }}
-            >
-            <LinearGradient
-                colors={["#84817f", "#ec985c", "#f87129"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                className="p-5"
-            >
-                <Text className="text-white/75 text-[11px] font-bold tracking-[1.5px] mb-3.5 text-center">
-                {currentMonth}
-                </Text>
+        <ExpenseSummaryCard
+          totalAmount={totalAmount}
+          currentMonth={currentMonth}
+          categories={CATEGORIES}
+        />
 
-                <View className="flex-row items-end justify-between">
-                <View className="bg-white/15 rounded-[14px] px-4 py-3 flex-1 mr-3">
-                    <Text className="text-white/80 text-[10px] font-bold tracking-[1.2px] mb-1">
-                    TOTAL CHELTUIELI
-                    </Text>
-                    <Text className="text-white text-[26px] font-extrabold -tracking-[0.5px]">
-                    {totalAmount}
-                    </Text>
-                </View>
-
-                <View className="bg-white/15 rounded-[14px] px-4 py-3 items-center min-w-[80px]">
-                    <Text className="text-white/80 text-[10px] font-bold tracking-[1.2px] mb-1">
-                    CATEGORII
-                    </Text>
-                    <Text className="text-white text-[26px] font-extrabold">
-                    {totalCategories}
-                    </Text>
-                </View>
-                </View>
-            </LinearGradient>
-        </View>
-
-        <VStack className="gap-3">
+        <VStack className="mt-5 gap-3">
           {CATEGORIES.map((cat) => (
             <ExpenseCategory key={cat.rank} {...cat} />
           ))}
