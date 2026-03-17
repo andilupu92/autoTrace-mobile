@@ -29,6 +29,8 @@ import { FloatingInput } from "@/components/ui/floating-input";
 import { useEffect } from "react";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { BlurView } from "expo-blur";
+import { carApi } from "@/src/api/services/carService";
+import { FloatingSelect } from "@/components/ui/floating-select";
 
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -40,12 +42,17 @@ type Props = {
   initialData?: { brand: string; model: string; year: number; kilometers: number } | null;
 };
 
+type Brand = {
+  id: number;
+  name: string;
+};
+
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const SHEET_HEIGHT = SCREEN_HEIGHT * 0.63;
 const DRAG_CLOSE_THRESHOLD = SHEET_HEIGHT * 0.28;
 
 const insertCarSchema = z.object({
-  brand: z.string().min(1, "Brand is required"),
+  brand: z.coerce.number().min(1, "Brand is required"),
   model: z.string().min(1, "Model is required"),
   kilometers: z.coerce.number().min(1, "Kilometers is required"),
   year: z.coerce.number().min(1886, "Year must be 1886 or later").max(new Date().getFullYear() + 1, `Year cannot be in the future`),
@@ -57,6 +64,7 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
   const translateY = useSharedValue(SHEET_HEIGHT);
   const backdropOpacity = useSharedValue(0);
   const dragContext = useSharedValue(0);
+  const [brands, setBrands] = useState<Brand[]>([]);
   const [isLoading, setLoading] = useState(false);
   const isEditing = !!initialData;
 
@@ -76,7 +84,7 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
         console.log("Attempting car save...");
         setLoading(true);
   
-        console.log("Car save Success for: ", data.brand);
+        console.log("Car save Success for: ", data);
       } catch (error: any) {
         const errorMessage = error?.response?.data?.message 
           || error?.message 
@@ -88,6 +96,10 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
   };
 
   useEffect(() => {
+      const fetchBrands = async () => {
+        const data = await carApi.getBrands();
+        setBrands(data);
+      };
       if (isVisible && initialData) {
         reset({
             brand: initialData.brand,
@@ -95,6 +107,9 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
             kilometers: initialData.kilometers,
             year: initialData.year,
         });
+        fetchBrands();
+      } else if (isVisible) {
+        fetchBrands();
       }
     }, [isVisible, initialData]);
 
@@ -209,18 +224,17 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
               <View className="flex-1 px-5 pt-6 gap-5">
 
                 {/* --- BRAND --- */}
-                <FormControl isInvalid={!!errors.brand}>
+                <FormControl isInvalid={!!errors.brand} style={{ zIndex: 999 }}>
                   <Controller
                     control={control}
                     name="brand"
-                    render={({ field: { onChange, value, onBlur } }) => (
-                      <FloatingInput
+                    render={({ field: { onChange, value } }) => (
+                      <FloatingSelect
                         label="Brand"
                         value={value}
-                        onChangeText={onChange}
-                        onBlur={onBlur}
+                        onValueChange={onChange}
+                        options={brands.map((b) => ({ label: b.name, value: b.id }))}
                         isInvalid={!!errors.brand}
-                        autoCapitalize="words"
                       />
                     )}
                   />

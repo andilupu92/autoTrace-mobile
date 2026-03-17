@@ -46,7 +46,6 @@ export default function CarsSection({ onAddCar, onEditCar }: CarsSectionProps) {
       try {
         setLoading(true);
         const responseData = await carApi.cars();
-        console.log("Fetched cars:", responseData);
         setCars(responseData);
       } catch (error) {
         console.error(error);

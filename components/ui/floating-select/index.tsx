@@ -8,13 +8,13 @@ import { Ionicons } from '@expo/vector-icons';
 
 interface SelectOption {
   label: string;
-  value: string;
+  value: any;
 }
 
 interface FloatingSelectProps {
   label: string;
-  value: string;
-  onValueChange: (value: string) => void;
+  value: any;
+  onValueChange: (value: any) => void;
   options: SelectOption[];
   isInvalid?: boolean;
   isDisabled?: boolean;

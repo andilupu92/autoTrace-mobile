@@ -21,5 +21,10 @@ export const carApi = {
     return response.data;
   },
 
+  getBrands: async () => {
+    const response = await apiClient.get(`${API_URL}/brand/get`);
+    return response.data;
+  }
+
 
 };
