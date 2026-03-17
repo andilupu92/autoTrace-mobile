@@ -37,18 +37,18 @@ if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental
 type Props = {
   isVisible: boolean;
   onClose: () => void;
-  initialData?: { brand: string; model: string; kilometers: string, year: number } | null;
+  initialData?: { brand: string; model: string; year: number; kilometers: number } | null;
 };
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
-const SHEET_HEIGHT = SCREEN_HEIGHT * 0.52;
+const SHEET_HEIGHT = SCREEN_HEIGHT * 0.63;
 const DRAG_CLOSE_THRESHOLD = SHEET_HEIGHT * 0.28;
 
 const insertCarSchema = z.object({
   brand: z.string().min(1, "Brand is required"),
   model: z.string().min(1, "Model is required"),
+  kilometers: z.coerce.number().min(1, "Kilometers is required"),
   year: z.coerce.number().min(1886, "Year must be 1886 or later").max(new Date().getFullYear() + 1, `Year cannot be in the future`),
-  kilometers: z.coerce.number().min(0, "Kilometers cannot be negative"),
 });
 
 type InsertCarFormData = z.input<typeof insertCarSchema>;
@@ -60,9 +60,14 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
   const [isLoading, setLoading] = useState(false);
   const isEditing = !!initialData;
 
-  const { control, handleSubmit, setValue, formState: { errors } } = useForm<InsertCarFormData>({
+  const { control, handleSubmit, reset, formState: { errors } } = useForm<InsertCarFormData>({
       resolver: zodResolver(insertCarSchema),
-      defaultValues: { brand: "", model: "", year: 0, kilometers: 0 },
+      defaultValues: {
+        brand: initialData?.brand ?? '',
+        model: initialData?.model ?? '',
+        kilometers: initialData?.kilometers ?? '',
+        year: initialData?.year ?? '',
+    },
       mode: "onChange"
   });
 
@@ -84,12 +89,14 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
 
   useEffect(() => {
       if (isVisible && initialData) {
-        setValue("brand", initialData.brand);
-        setValue("model", initialData.model);
-        setValue("year", initialData.year);
-        setValue("kilometers", initialData.kilometers);
+        reset({
+            brand: initialData.brand,
+            model: initialData.model,
+            kilometers: initialData.kilometers,
+            year: initialData.year,
+        });
       }
-    }, [isVisible]);
+    }, [isVisible, initialData]);
 
     useAnimatedReaction(
         () => isVisible,

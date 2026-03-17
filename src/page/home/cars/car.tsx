@@ -9,7 +9,7 @@ export default function Car({
   onEdit,
 }: {
   name: string;
-  km: string;
+  km: number;
   highlight?: boolean;
   onEdit?: () => void;
 }) {
@@ -60,7 +60,7 @@ export default function Car({
       </TouchableOpacity>
       
       <Text className={`text-[10px] font-bold uppercase mt-3 tracking-tighter ${highlight ? "text-orange-400" : "text-gray-400"}`}>
-        {km}
+        {km} Km
       </Text>
     </View>
   );

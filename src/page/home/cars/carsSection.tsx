@@ -3,10 +3,11 @@ import {
   View,
   Dimensions,
   Text,
+  ActivityIndicator,
 } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { Path, Svg } from "react-native-svg";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -16,10 +17,11 @@ import Animated, {
 } from "react-native-reanimated";
 import Car from "./car";
 import HeaderSection from "@/src/utils/headerSection";
+import { carApi } from "@/src/api/services/carService";
 
 type CarsSectionProps = {
   onAddCar: () => void;
-  onEditCar: (data: { brand: string; model: string; kilometers: string; year: number }) => void;
+  onEditCar: (data: { brand: string; model: string; kilometers: number;year: number }) => void;
 };
 
 const { width } = Dimensions.get("window");
@@ -27,34 +29,48 @@ const WHITE_CARD_HEIGHT = 160;
 const SWIPE_THRESHOLD = 50;
 
 type CarItem = {
-  id: string;
-  name: string;
-  km: string;
+  brand: string;
+  model: string;
+  kilometers: number;
   year: number;
 };
 
-const INITIAL_CARS: CarItem[] = [
-  { id: "1", name: "BMW X6",     km: "321.000 KM", year: 2020 },
-  { id: "2", name: "Audi A5",    km: "120.000 KM", year: 2019 },
-  { id: "3", name: "Dacia 1300", km: "400.000 KM", year: 1975 },
-];
-
 export default function CarsSection({ onAddCar, onEditCar }: CarsSectionProps) {
-  const [cars, setCars]                 = useState<CarItem[]>(INITIAL_CARS);
+  const [loading, setLoading] = useState(false);
+  const [cars, setCars]                 = useState<CarItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(1);
   const translateX = useSharedValue(0);
-  const [editingData, setEditingData] = useState<{ 
-    brand: string; model: string; kilometers: string; year: number } | null>(null);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchCars = async () => {
+      try {
+        setLoading(true);
+        const responseData = await carApi.cars();
+        console.log("Fetched cars:", responseData);
+        setCars(responseData);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+        fetchCars();
+  }, []);
 
   const total = cars.length;
 
   const getVisibleCars = (index: number) => {
     if (total === 0) return [null, null, null];
-    const prev = (index - 1 + total) % total;
-    const next = (index + 1) % total;
-    return [cars[prev], cars[index], cars[next]];
-  };
+    if (total === 1) return [null, cars[0], null];
+
+    const prevIndex = (index - 1 + total) % total;
+    const nextIndex = (index + 1) % total;
+
+    const prev = total > 2 ? cars[prevIndex] : null;
+    const next = cars[nextIndex];
+
+    return [prev, cars[index], next];
+};
 
   const animateSwipe = (direction: "left" | "right", nextIndex: number) => {
     const toValue = direction === "left" ? -width : width;
@@ -85,17 +101,16 @@ export default function CarsSection({ onAddCar, onEditCar }: CarsSectionProps) {
 
   const handleEdit = () => {
     const car = cars[currentIndex];
-    const [brand, ...rest] = car.name.split(" ");
     onEditCar({
-      brand,
-      model: rest.join(" "),
-      kilometers: car.km.replace(/[^0-9]/g, ""),
+      brand: car.brand,
+      model: car.model,
+      kilometers: car.kilometers,
       year: car.year,
     });
   };
 
   const [prevCar, currentCar, nextCar] = getVisibleCars(currentIndex);
-
+  if (loading) return <ActivityIndicator />;
   return (
     <View style={{ flex: 1 }}>
       <View style={{ width, height: WHITE_CARD_HEIGHT + 20 }} className="px-6">
@@ -139,9 +154,9 @@ export default function CarsSection({ onAddCar, onEditCar }: CarsSectionProps) {
             style={[animatedStyle, { marginTop: 20 }]}
             className="flex-row justify-between px-6"
           >
-            {prevCar    && <Car name={prevCar.name}    km={prevCar.km} />}
-            {currentCar && <Car name={currentCar.name} km={currentCar.km} highlight onEdit={handleEdit}/>}
-            {nextCar    && <Car name={nextCar.name}    km={nextCar.km} />}
+            {prevCar    && <Car name={prevCar.brand}    km={prevCar.kilometers} />}
+            {currentCar && <Car name={currentCar.brand} km={currentCar.kilometers} highlight onEdit={handleEdit}/>}
+            {nextCar    && <Car name={nextCar.brand}    km={nextCar.kilometers} />}
           </Animated.View>
         </GestureDetector>
       </View>

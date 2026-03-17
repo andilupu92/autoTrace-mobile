@@ -128,7 +128,7 @@ export default function FloatingInput({
             <InputField
               className={"font-bold text-base text-gray-800 dark:text-white p-0 leading-tight"}
               placeholder=""
-              value={value}
+              value={value !== undefined && value !== null ? String(value) : ''}
               onChangeText={onChangeText}
               onFocus={handleFocus}
               onBlur={handleBlur}

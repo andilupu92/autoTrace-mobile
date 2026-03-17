@@ -22,7 +22,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
     return (
-      <Stack.Navigator initialRouteName="Home" screenOptions={{ headerShown: true }}>
+      <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: true }}>
         {/*{isAuthenticated ? (
           <>*/}
             <Stack.Screen name="SignUp" component={SignUpScreen} options={{ headerShown: false }} />
