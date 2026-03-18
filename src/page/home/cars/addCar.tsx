@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   Platform,
   UIManager,
@@ -56,8 +56,6 @@ type Model = {
 };
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
-const SHEET_HEIGHT = SCREEN_HEIGHT * 0.63;
-const DRAG_CLOSE_THRESHOLD = SHEET_HEIGHT * 0.28;
 
 const insertCarSchema = z.object({
   brandId: z.coerce.number().min(1, "Brand is required"),
@@ -79,9 +77,10 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
     },
       mode: "onChange"
   });
+  const sheetHeightRef = useRef(SCREEN_HEIGHT * 0.63);
+  const translateY = useSharedValue(SCREEN_HEIGHT);
   const navigation =
       useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const translateY = useSharedValue(SHEET_HEIGHT);
   const selectedBrand = watch("brandId");
   const backdropOpacity = useSharedValue(0);
   const dragContext = useSharedValue(0);
@@ -158,7 +157,7 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
     
       const closeSheet = () => {
         translateY.value = withTiming(
-          SHEET_HEIGHT,
+          sheetHeightRef.current,
           { duration: 280 },
           (finished) => {
             if (finished) runOnJS(onClose)();
@@ -178,16 +177,14 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
     
           backdropOpacity.value = interpolate(
             translateY.value,
-            [0, SHEET_HEIGHT],
+            [0, sheetHeightRef.current],
             [1, 0],
             Extrapolation.CLAMP
           );
         })
         .onEnd((event) => {
-          if (
-            event.translationY > DRAG_CLOSE_THRESHOLD ||
-            event.velocityY > 500
-          ) {
+          const threshold = sheetHeightRef.current * 0.28;
+          if (event.translationY > threshold || event.velocityY > 500) {
             runOnJS(closeSheet)();
           } else {
             translateY.value = withSpring(0, { damping: 22, stiffness: 160 });
@@ -230,6 +227,16 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
             <Animated.View
               style={[styles.sheet, animatedSheetStyle]}
               className="bg-white"
+              onLayout={(e) => {
+                const measuredHeight = e.nativeEvent.layout.height;
+                sheetHeightRef.current = measuredHeight;
+                if (isVisible) {
+                  translateY.value = withSpring(0, { damping: 22, stiffness: 160, mass: 0.8 });
+                  backdropOpacity.value = withTiming(1, { duration: 320 });
+                } else {
+                  translateY.value = measuredHeight;
+                }
+              }}
             >
               {/* Handle indicator */}
               <View className="items-center pt-3 pb-1">
@@ -378,7 +385,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: SHEET_HEIGHT,
+    maxHeight: SCREEN_HEIGHT * 0.95,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     shadowColor: "#000",

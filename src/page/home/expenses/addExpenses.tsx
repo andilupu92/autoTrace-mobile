@@ -32,11 +32,9 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { BlurView } from "expo-blur";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
-const SHEET_HEIGHT = SCREEN_HEIGHT * 0.52;
-const DRAG_CLOSE_THRESHOLD = SHEET_HEIGHT * 0.28;
 
 type Props = {
   isVisible: boolean;
@@ -60,7 +58,8 @@ const documentSchema = z.object({
 type ExpensesFormData = z.infer<typeof documentSchema>;
 
 export default function AddExpenses({ isVisible, onClose }: Props) {
-  const translateY = useSharedValue(SHEET_HEIGHT);
+  const sheetHeightRef = useRef(SCREEN_HEIGHT * 0.63);
+  const translateY = useSharedValue(SCREEN_HEIGHT);
   const backdropOpacity = useSharedValue(0);
   const dragContext = useSharedValue(0);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -103,7 +102,7 @@ export default function AddExpenses({ isVisible, onClose }: Props) {
 
   const closeSheet = () => {
     translateY.value = withTiming(
-      SHEET_HEIGHT,
+      sheetHeightRef.current,
       { duration: 280 },
       (finished) => {
         if (finished) runOnJS(onClose)();
@@ -123,16 +122,14 @@ export default function AddExpenses({ isVisible, onClose }: Props) {
 
       backdropOpacity.value = interpolate(
         translateY.value,
-        [0, SHEET_HEIGHT],
+        [0, sheetHeightRef.current],
         [1, 0],
         Extrapolation.CLAMP
       );
     })
     .onEnd((event) => {
-      if (
-        event.translationY > DRAG_CLOSE_THRESHOLD ||
-        event.velocityY > 500
-      ) {
+      const threshold = sheetHeightRef.current * 0.28;
+      if (event.translationY > threshold || event.velocityY > 500) {
         runOnJS(closeSheet)();
       } else {
         translateY.value = withSpring(0, { damping: 22, stiffness: 160 });
@@ -175,6 +172,16 @@ export default function AddExpenses({ isVisible, onClose }: Props) {
         <Animated.View
           style={[styles.sheet, animatedSheetStyle]}
           className="bg-white"
+          onLayout={(e) => {
+            const measuredHeight = e.nativeEvent.layout.height;
+            sheetHeightRef.current = measuredHeight;
+            if (isVisible) {
+              translateY.value = withSpring(0, { damping: 22, stiffness: 160, mass: 0.8 });
+              backdropOpacity.value = withTiming(1, { duration: 320 });
+            } else {
+              translateY.value = measuredHeight;
+            }
+          }}
         >
           {/* Handle indicator */}
           <View className="items-center pt-3 pb-1">
@@ -350,7 +357,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: SHEET_HEIGHT,
+    maxHeight: SCREEN_HEIGHT * 0.95,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     shadowColor: "#000",
