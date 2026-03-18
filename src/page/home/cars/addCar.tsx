@@ -47,13 +47,18 @@ type Brand = {
   name: string;
 };
 
+type Model = {
+  id: number;
+  name: string;
+};
+
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const SHEET_HEIGHT = SCREEN_HEIGHT * 0.63;
 const DRAG_CLOSE_THRESHOLD = SHEET_HEIGHT * 0.28;
 
 const insertCarSchema = z.object({
   brand: z.coerce.number().min(1, "Brand is required"),
-  model: z.string().min(1, "Model is required"),
+  model: z.coerce.number().min(1, "Model is required"),
   kilometers: z.coerce.number().min(1, "Kilometers is required"),
   year: z.coerce.number().min(1886, "Year must be 1886 or later").max(new Date().getFullYear() + 1, `Year cannot be in the future`),
 });
@@ -61,14 +66,7 @@ const insertCarSchema = z.object({
 type InsertCarFormData = z.input<typeof insertCarSchema>;
 
 export default function AddCar({ isVisible, onClose, initialData }: Props) {
-  const translateY = useSharedValue(SHEET_HEIGHT);
-  const backdropOpacity = useSharedValue(0);
-  const dragContext = useSharedValue(0);
-  const [brands, setBrands] = useState<Brand[]>([]);
-  const [isLoading, setLoading] = useState(false);
-  const isEditing = !!initialData;
-
-  const { control, handleSubmit, reset, formState: { errors } } = useForm<InsertCarFormData>({
+  const { control, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<InsertCarFormData>({
       resolver: zodResolver(insertCarSchema),
       defaultValues: {
         brand: initialData?.brand ?? '',
@@ -78,6 +76,14 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
     },
       mode: "onChange"
   });
+  const translateY = useSharedValue(SHEET_HEIGHT);
+  const selectedBrand = watch("brand");
+  const backdropOpacity = useSharedValue(0);
+  const dragContext = useSharedValue(0);
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [models, setModels] = useState<Model[]>([]);
+  const [isLoading, setLoading] = useState(false);
+  const isEditing = !!initialData;
 
   const onSubmit = async (data: InsertCarFormData) => {
       try {
@@ -112,6 +118,18 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
         fetchBrands();
       }
     }, [isVisible, initialData]);
+
+    useEffect(() => {
+        if (!selectedBrand) return;
+
+        setValue("model", "");
+        const fetchModels = async () => {
+          const data = await carApi.getModels(Number(selectedBrand));
+          setModels(data);
+        };
+
+        fetchModels();
+    }, [selectedBrand]);
 
     useAnimatedReaction(
         () => isVisible,
@@ -246,18 +264,17 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
                 </FormControl>
 
                 {/* --- MODEL --- */}
-                <FormControl isInvalid={!!errors.model}>
+                <FormControl isInvalid={!!errors.model} style={{ zIndex: 998 }}>
                   <Controller
                     control={control}
                     name="model"
-                    render={({ field: { onChange, value, onBlur } }) => (
-                      <FloatingInput
+                    render={({ field: { onChange, value } }) => (
+                      <FloatingSelect
                         label="Model"
                         value={value}
-                        onChangeText={onChange}
-                        onBlur={onBlur}
+                        onValueChange={onChange}
+                        options={models.map((m) => ({ label: m.name, value: m.id }))}
                         isInvalid={!!errors.model}
-                        autoCapitalize="words"
                       />
                     )}
                   />
