@@ -3,8 +3,8 @@ import apiClient from "../client";
 const API_URL = '/car';
 
 export interface CarCredentials {
-  brand: string;
-  model: string;
+  brandId: number;
+  modelId: number;
   year: number;
   kilometers: number;
 }

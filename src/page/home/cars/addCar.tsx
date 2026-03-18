@@ -31,6 +31,9 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { BlurView } from "expo-blur";
 import { carApi } from "@/src/api/services/carService";
 import { FloatingSelect } from "@/components/ui/floating-select";
+import { RootStackParamList } from "@/src/navigation/AppNavigator";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useNavigation } from "@react-navigation/native";
 
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -57,8 +60,8 @@ const SHEET_HEIGHT = SCREEN_HEIGHT * 0.63;
 const DRAG_CLOSE_THRESHOLD = SHEET_HEIGHT * 0.28;
 
 const insertCarSchema = z.object({
-  brand: z.coerce.number().min(1, "Brand is required"),
-  model: z.coerce.number().min(1, "Model is required"),
+  brandId: z.coerce.number().min(1, "Brand is required"),
+  modelId: z.coerce.number().min(1, "Model is required"),
   kilometers: z.coerce.number().min(1, "Kilometers is required"),
   year: z.coerce.number().min(1886, "Year must be 1886 or later").max(new Date().getFullYear() + 1, `Year cannot be in the future`),
 });
@@ -69,15 +72,17 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
   const { control, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<InsertCarFormData>({
       resolver: zodResolver(insertCarSchema),
       defaultValues: {
-        brand: initialData?.brand ?? '',
-        model: initialData?.model ?? '',
+        brandId: initialData?.brand ?? '',
+        modelId: initialData?.model ?? '',
         kilometers: initialData?.kilometers ?? '',
         year: initialData?.year ?? '',
     },
       mode: "onChange"
   });
+  const navigation =
+      useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const translateY = useSharedValue(SHEET_HEIGHT);
-  const selectedBrand = watch("brand");
+  const selectedBrand = watch("brandId");
   const backdropOpacity = useSharedValue(0);
   const dragContext = useSharedValue(0);
   const [brands, setBrands] = useState<Brand[]>([]);
@@ -89,8 +94,14 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
       try {
         console.log("Attempting car save...");
         setLoading(true);
-  
-        console.log("Car save Success for: ", data);
+        const validatedData = insertCarSchema.parse(data);
+        await carApi.register(validatedData);
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Home' }],
+        });
+        console.log("Car saved successfully");
+        onClose();
       } catch (error: any) {
         const errorMessage = error?.response?.data?.message 
           || error?.message 
@@ -108,8 +119,8 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
       };
       if (isVisible && initialData) {
         reset({
-            brand: initialData.brand,
-            model: initialData.model,
+            brandId: initialData.brand,
+            modelId: initialData.model,
             kilometers: initialData.kilometers,
             year: initialData.year,
         });
@@ -122,7 +133,7 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
     useEffect(() => {
         if (!selectedBrand) return;
 
-        setValue("model", "");
+        setValue("modelId", "");
         const fetchModels = async () => {
           const data = await carApi.getModels(Number(selectedBrand));
           setModels(data);
@@ -242,45 +253,45 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
               <View className="flex-1 px-5 pt-6 gap-5">
 
                 {/* --- BRAND --- */}
-                <FormControl isInvalid={!!errors.brand} style={{ zIndex: 999 }}>
+                <FormControl isInvalid={!!errors.brandId} style={{ zIndex: 999 }}>
                   <Controller
                     control={control}
-                    name="brand"
+                    name="brandId"
                     render={({ field: { onChange, value } }) => (
                       <FloatingSelect
                         label="Brand"
                         value={value}
                         onValueChange={onChange}
                         options={brands.map((b) => ({ label: b.name, value: b.id }))}
-                        isInvalid={!!errors.brand}
+                        isInvalid={!!errors.brandId}
                       />
                     )}
                   />
                   <FormControlError>
                     <FormControlErrorText className="ml-2 mt-1 text-xs text-red-500">
-                      {errors.brand?.message}
+                      {errors.brandId?.message}
                     </FormControlErrorText>
                   </FormControlError>
                 </FormControl>
 
                 {/* --- MODEL --- */}
-                <FormControl isInvalid={!!errors.model} style={{ zIndex: 998 }}>
+                <FormControl isInvalid={!!errors.modelId} style={{ zIndex: 998 }}>
                   <Controller
                     control={control}
-                    name="model"
+                    name="modelId"
                     render={({ field: { onChange, value } }) => (
                       <FloatingSelect
                         label="Model"
                         value={value}
                         onValueChange={onChange}
                         options={models.map((m) => ({ label: m.name, value: m.id }))}
-                        isInvalid={!!errors.model}
+                        isInvalid={!!errors.modelId}
                       />
                     )}
                   />
                   <FormControlError>
                     <FormControlErrorText className="ml-2 mt-1 text-xs text-red-500">
-                      {errors.model?.message}
+                      {errors.modelId?.message}
                     </FormControlErrorText>
                   </FormControlError>
                 </FormControl>
