@@ -14,7 +14,7 @@ export default function Car({
   onEdit?: () => void;
 }) {
   return (
-    <View className="items-center" style={!highlight ? { marginTop: -12 } : undefined}>
+    <View className="items-center" style={!highlight ? { marginTop: -25 } : undefined}>
       <TouchableOpacity 
         activeOpacity={highlight ? 0.7 : 1}
         onPress={highlight ? onEdit : undefined}

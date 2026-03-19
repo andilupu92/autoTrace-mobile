@@ -144,19 +144,23 @@ export default function CarsSection({ onAddCar, onEditCar }: CarsSectionProps) {
           </Text>
         </View>
 
-        {/* ── Cars carousel ── */}
-        <GestureDetector gesture={pan}>
-          <Animated.View
-            style={[animatedStyle, { marginTop: 20 }]}
-            className={`flex-row px-6 ${
-              (total === 1 || total === 2) ? "justify-center" : "justify-between"
-            }`}
-          >
-            {prevCar    && <Car name={prevCar.brand}    km={prevCar.kilometers} />}
-            {currentCar && <Car name={currentCar.brand} km={currentCar.kilometers} highlight onEdit={handleEdit}/>}
-            {nextCar    && <Car name={nextCar.brand}    km={nextCar.kilometers} />}
-          </Animated.View>
-        </GestureDetector>
+        <View style={{ marginTop: 12 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 8 }}>
+            
+            <Text style={{ opacity: total >= 2 ? 1 : 0, color: "#F97316", fontSize: 40, fontWeight: "300", width: 24, textAlign: "center" }}>‹</Text>
+
+            <GestureDetector gesture={pan}>
+              <Animated.View style={[animatedStyle, { flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 25 }]}>
+                {prevCar    && <Car name={prevCar.brand}    km={prevCar.kilometers} />}
+                {currentCar && <Car name={currentCar.brand} km={currentCar.kilometers} highlight onEdit={handleEdit} />}
+                {nextCar    && <Car name={nextCar.brand}    km={nextCar.kilometers} />}
+              </Animated.View>
+            </GestureDetector>
+
+            <Text style={{ opacity: total >= 2 ? 1 : 0, color: "#F97316", fontSize: 40, fontWeight: "300", width: 24, textAlign: "center" }}>›</Text>
+
+          </View>
+        </View>
       </View>
     </View>
   );
