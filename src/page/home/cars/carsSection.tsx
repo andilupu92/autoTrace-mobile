@@ -60,12 +60,7 @@ export default function CarsSection({ onAddCar, onEditCar }: CarsSectionProps) {
 
   const getVisibleCars = (index: number) => {
     if (total === 0) return [null, null, null];
-    if (total === 1) return [null, cars[0], null];
-    if (total === 2) return [null, cars[index], null];
-
-    const prevIndex = (index - 1 + total) % total;
-    const nextIndex = (index + 1) % total;
-    return [cars[prevIndex], cars[index], cars[nextIndex]];
+    return [null, cars[index], null];
   };
 
   const animateSwipe = (direction: "left" | "right", nextIndex: number) => {
@@ -91,9 +86,37 @@ export default function CarsSection({ onAddCar, onEditCar }: CarsSectionProps) {
       }
     });
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: translateX.value }],
-  }));
+  const animatedStyle = useAnimatedStyle(() => {
+    const tx = translateX.value;
+    const curveY = -160 * (tx / width) * (tx / width);
+
+    return {
+      transform: [
+        { translateX: tx },
+        { translateY: curveY },
+      ],
+    };
+  });
+
+  const leftArrowStyle = useAnimatedStyle(() => {
+    const isActive = translateX.value < 0;
+    const progress = Math.min(Math.abs(translateX.value) / SWIPE_THRESHOLD, 1);
+    
+    return {
+      transform: [{ scale: isActive ? 1 + progress * 0.5 : 1 }],
+      opacity: isActive ? 0.4 + progress * 0.6 : 0.4,
+    };
+  });
+
+  const rightArrowStyle = useAnimatedStyle(() => {
+    const isActive = translateX.value > 0;
+    const progress = Math.min(Math.abs(translateX.value) / SWIPE_THRESHOLD, 1);
+
+    return {
+      transform: [{ scale: isActive ? 1 + progress * 0.5 : 1 }],
+      opacity: isActive ? 0.4 + progress * 0.6 : 0.4,
+    };
+  });
 
   const handleEdit = () => {
     const car = cars[currentIndex];
@@ -147,7 +170,11 @@ export default function CarsSection({ onAddCar, onEditCar }: CarsSectionProps) {
         <View style={{ marginTop: 12 }}>
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 8 }}>
             
-            <Text style={{ opacity: total >= 2 ? 1 : 0, color: "#F97316", fontSize: 40, fontWeight: "300", width: 24, textAlign: "center" }}>‹</Text>
+            <Animated.Text style={[leftArrowStyle, { 
+              color: "#F97316", fontSize: 40, fontWeight: "300", 
+              width: 24, textAlign: "center",
+              opacity: total >= 2 ? undefined : 0  
+            }]}>‹</Animated.Text>
 
             <GestureDetector gesture={pan}>
               <Animated.View style={[animatedStyle, { flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 25 }]}>
@@ -157,8 +184,12 @@ export default function CarsSection({ onAddCar, onEditCar }: CarsSectionProps) {
               </Animated.View>
             </GestureDetector>
 
-            <Text style={{ opacity: total >= 2 ? 1 : 0, color: "#F97316", fontSize: 40, fontWeight: "300", width: 24, textAlign: "center" }}>›</Text>
-
+            <Animated.Text style={[rightArrowStyle, { 
+              color: "#F97316", fontSize: 40, fontWeight: "300", 
+              width: 24, textAlign: "center",
+              opacity: total >= 2 ? undefined : 0  
+            }]}>›</Animated.Text>
+            
           </View>
         </View>
       </View>
