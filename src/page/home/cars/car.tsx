@@ -5,61 +5,46 @@ import { Ionicons } from '@expo/vector-icons';
 export default function Car({
   name,
   km,
-  highlight = false,
   onEdit,
 }: {
   name: string;
   km: number;
-  highlight?: boolean;
   onEdit?: () => void;
 }) {
   return (
-    <View className="items-center" style={!highlight ? { marginTop: -25 } : undefined}>
+    <View className="items-center" style={{ marginTop: -25 }}>
       <TouchableOpacity 
-        activeOpacity={highlight ? 0.7 : 1}
-        onPress={highlight ? onEdit : undefined}
+        activeOpacity={1}
+        onPress={onEdit}
         className="w-20 h-20 rounded-full items-center justify-center bg-white"
         style={
-          highlight 
-            ? { 
-                borderWidth: 1.5, 
-                borderColor: '#f97316',
-                elevation: 6,
-                shadowColor: '#f97316',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.2,
-                shadowRadius: 4,
-                position: 'relative', 
-              }
-            : { 
-                borderColor: '#E5E7EB',
-                borderTopColor: 'transparent',
-                borderLeftColor: 'transparent',
-                borderRightColor: 'transparent',
-              } 
+          { 
+            borderColor: '#E5E7EB',
+            borderTopColor: 'transparent',
+            borderLeftColor: 'transparent',
+            borderRightColor: 'transparent',
+          } 
         }
       >
         {/* Edit button */}
-        {highlight && (
-          <View 
-            style={{ 
-              position: 'absolute', 
-              top: 7,
-              right: 7,
-              padding: 4,
-              opacity: 0.3,
-            }}
-          >
-            <Ionicons name="pencil" size={44} color="#9CA3AF" />
-          </View>
-        )}
+        <View 
+          style={{ 
+            position: 'absolute', 
+            top: 7,
+            right: 7,
+            padding: 4,
+            opacity: 0.3,
+          }}
+        >
+          <Ionicons name="pencil" size={44} color="#9CA3AF" />
+        </View>
 
-        <Text className={`font-bold text-center px-1 ${highlight ? "text-orange-500 text-[13px]" : "text-gray-400 text-[10px]"}`}>
+        <Text className={`font-bold text-center px-1 text-orange-500 text-[13px]`}>
           {name}
         </Text>
       </TouchableOpacity>
       
-      <Text className={`text-[10px] font-bold uppercase mt-3 tracking-tighter ${highlight ? "text-orange-400" : "text-gray-400"}`}>
+      <Text className={`text-[10px] font-bold uppercase mt-3 tracking-tighter text-orange-400`}>
         {km} Km
       </Text>
     </View>

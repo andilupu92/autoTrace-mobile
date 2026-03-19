@@ -25,6 +25,7 @@ type CarsSectionProps = {
 };
 
 const { width } = Dimensions.get("window");
+const CONTAINER_WIDTH = width - 160;
 const WHITE_CARD_HEIGHT = 160;
 const SWIPE_THRESHOLD = 50;
 
@@ -58,13 +59,8 @@ export default function CarsSection({ onAddCar, onEditCar }: CarsSectionProps) {
 
   const total = cars.length;
 
-  const getVisibleCars = (index: number) => {
-    if (total === 0) return [null, null, null];
-    return [null, cars[index], null];
-  };
-
   const animateSwipe = (direction: "left" | "right", nextIndex: number) => {
-    const toValue = direction === "left" ? -width : width;
+    const toValue = direction === "left" ? -CONTAINER_WIDTH : CONTAINER_WIDTH;
     translateX.value = withTiming(toValue, { duration: 300 }, (finished) => {
       if (finished) {
         runOnJS(setCurrentIndex)(nextIndex);
@@ -84,17 +80,40 @@ export default function CarsSection({ onAddCar, onEditCar }: CarsSectionProps) {
       } else {
         translateX.value = withSpring(0);
       }
-    });
+  });
 
-  const animatedStyle = useAnimatedStyle(() => {
+  const currentCarStyle = useAnimatedStyle(() => {
     const tx = translateX.value;
     const curveY = -160 * (tx / width) * (tx / width);
-
     return {
       transform: [
-        { translateX: tx },
+        { translateX: translateX.value },
         { translateY: curveY },
       ],
+    };
+  });
+
+  const nextCarStyle = useAnimatedStyle(() => {
+    const tx = translateX.value + CONTAINER_WIDTH;
+    const curveY = -160 * (tx / width) * (tx / width);
+    return {
+      transform: [
+        { translateX: translateX.value + CONTAINER_WIDTH },
+        { translateY: curveY },
+      ],
+      opacity: translateX.value < 0 ? 1 : 0,
+    };
+  });
+
+  const prevCarStyle = useAnimatedStyle(() => {
+    const tx = translateX.value - CONTAINER_WIDTH;
+    const curveY = -160 * (tx / width) * (tx / width);
+    return {
+      transform: [
+        { translateX: translateX.value - CONTAINER_WIDTH },
+        { translateY: curveY },
+      ],
+      opacity: translateX.value > 0 ? 1 : 0,
     };
   });
 
@@ -128,7 +147,6 @@ export default function CarsSection({ onAddCar, onEditCar }: CarsSectionProps) {
     });
   };
 
-  const [prevCar, currentCar, nextCar] = getVisibleCars(currentIndex);
   if (loading) return <ActivityIndicator />;
   return (
     <View style={{ flex: 1 }}>
@@ -167,7 +185,7 @@ export default function CarsSection({ onAddCar, onEditCar }: CarsSectionProps) {
           </Text>
         </View>
 
-        <View style={{ marginTop: 12 }}>
+        <View style={{ marginTop: 35 }}>
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 8 }}>
             
             <Animated.Text style={[leftArrowStyle, { 
@@ -176,13 +194,39 @@ export default function CarsSection({ onAddCar, onEditCar }: CarsSectionProps) {
               opacity: total >= 2 ? undefined : 0  
             }]}>‹</Animated.Text>
 
-            <GestureDetector gesture={pan}>
-              <Animated.View style={[animatedStyle, { flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 25 }]}>
-                {prevCar    && <Car name={prevCar.brand}    km={prevCar.kilometers} />}
-                {currentCar && <Car name={currentCar.brand} km={currentCar.kilometers} highlight onEdit={handleEdit} />}
-                {nextCar    && <Car name={nextCar.brand}    km={nextCar.kilometers} />}
-              </Animated.View>
-            </GestureDetector>
+            {(() => {
+              const nextIndex = (currentIndex + 1) % total;
+              const prevIndex = (currentIndex - 1 + total) % total;
+              const currentCar = total > 0 ? cars[currentIndex] : null;
+              const nextCar = total >= 2 ? cars[nextIndex] : null;
+              const prevCar = total >= 2 ? cars[prevIndex] : null;
+
+              return (
+                <GestureDetector gesture={pan}>
+                  <View style={{ flex: 1, height: 120 }}>
+                    
+                    {prevCar && (
+                      <Animated.View style={[prevCarStyle, { position: "absolute", width: "100%", alignItems: "center" }]}>
+                        <Car name={prevCar.brand} km={prevCar.kilometers} onEdit={handleEdit} />
+                      </Animated.View>
+                    )}
+
+                    {currentCar && (
+                      <Animated.View style={[currentCarStyle, { position: "absolute", width: "100%", alignItems: "center" }]}>
+                        <Car name={currentCar.brand} km={currentCar.kilometers} onEdit={handleEdit} />
+                      </Animated.View>
+                    )}
+
+                    {nextCar && (
+                      <Animated.View style={[nextCarStyle, { position: "absolute", width: "100%", alignItems: "center" }]}>
+                        <Car name={nextCar.brand} km={nextCar.kilometers} onEdit={handleEdit} />
+                      </Animated.View>
+                    )}
+
+                  </View>
+                </GestureDetector>
+              );
+            })()}
 
             <Animated.Text style={[rightArrowStyle, { 
               color: "#F97316", fontSize: 40, fontWeight: "300", 
