@@ -38,7 +38,7 @@ type CarItem = {
 export default function CarsSection({ onAddCar, onEditCar }: CarsSectionProps) {
   const [loading, setLoading] = useState(false);
   const [cars, setCars]                 = useState<CarItem[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(1);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const translateX = useSharedValue(0);
 
   useEffect(() => {
@@ -61,15 +61,12 @@ export default function CarsSection({ onAddCar, onEditCar }: CarsSectionProps) {
   const getVisibleCars = (index: number) => {
     if (total === 0) return [null, null, null];
     if (total === 1) return [null, cars[0], null];
+    if (total === 2) return [null, cars[index], null];
 
     const prevIndex = (index - 1 + total) % total;
     const nextIndex = (index + 1) % total;
-
-    const prev = total > 2 ? cars[prevIndex] : null;
-    const next = cars[nextIndex];
-
-    return [prev, cars[index], next];
-};
+    return [cars[prevIndex], cars[index], cars[nextIndex]];
+  };
 
   const animateSwipe = (direction: "left" | "right", nextIndex: number) => {
     const toValue = direction === "left" ? -width : width;
@@ -151,7 +148,9 @@ export default function CarsSection({ onAddCar, onEditCar }: CarsSectionProps) {
         <GestureDetector gesture={pan}>
           <Animated.View
             style={[animatedStyle, { marginTop: 20 }]}
-            className="flex-row justify-between px-6"
+            className={`flex-row px-6 ${
+              (total === 1 || total === 2) ? "justify-center" : "justify-between"
+            }`}
           >
             {prevCar    && <Car name={prevCar.brand}    km={prevCar.kilometers} />}
             {currentCar && <Car name={currentCar.brand} km={currentCar.kilometers} highlight onEdit={handleEdit}/>}
