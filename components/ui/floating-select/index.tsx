@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   Animated,
   View,
@@ -53,6 +53,14 @@ export default function FloatingSelect({
   const triggerRef = useRef<View>(null);
   const { colorScheme } = useColorScheme();
   const animatedValue = useRef(new Animated.Value(value ? 1 : 0)).current;
+
+  useEffect(() => {
+    Animated.timing(animatedValue, {
+      toValue: value ? 1 : 0,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+  }, [value]);
 
   const OPTION_HEIGHT = 48;
   const scrollMaxHeight = maxVisibleOptions * OPTION_HEIGHT;

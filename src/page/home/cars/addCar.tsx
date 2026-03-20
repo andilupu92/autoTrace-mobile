@@ -74,7 +74,7 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
         modelId: initialData?.modelId ?? '',
         kilometers: initialData?.kilometers ?? '',
         year: initialData?.year ?? '',
-    },
+      },
       mode: "onChange"
   });
   const sheetHeightRef = useRef(SCREEN_HEIGHT * 0.63);
