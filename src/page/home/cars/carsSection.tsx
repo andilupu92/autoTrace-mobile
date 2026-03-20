@@ -21,7 +21,7 @@ import { carApi } from "@/src/api/services/carService";
 
 type CarsSectionProps = {
   onAddCar: () => void;
-  onEditCar: (data: { brandId: number; modelId: number; kilometers: number; year: number }) => void;
+  onEditCar: (data: { id: number; brandId: number; modelId: number; kilometers: number; year: number }) => void;
 };
 
 const { width } = Dimensions.get("window");
@@ -30,6 +30,7 @@ const WHITE_CARD_HEIGHT = 160;
 const SWIPE_THRESHOLD = 50;
 
 type CarItem = {
+  id: number;
   brandId: number;
   modelId: number;
   kilometers: number;
@@ -140,6 +141,7 @@ export default function CarsSection({ onAddCar, onEditCar }: CarsSectionProps) {
   const handleEdit = () => {
     const car = cars[currentIndex];
     onEditCar({
+      id: car.id,
       brandId: car.brandId,
       modelId: car.modelId,
       kilometers: car.kilometers,
@@ -207,19 +209,19 @@ export default function CarsSection({ onAddCar, onEditCar }: CarsSectionProps) {
                     
                     {prevCar && (
                       <Animated.View style={[prevCarStyle, { position: "absolute", width: "100%", alignItems: "center" }]}>
-                        <Car name={prevCar.brandId} km={prevCar.kilometers} onEdit={handleEdit} />
+                        <Car name={prevCar.id} km={prevCar.kilometers} onEdit={handleEdit} />
                       </Animated.View>
                     )}
 
                     {currentCar && (
                       <Animated.View style={[currentCarStyle, { position: "absolute", width: "100%", alignItems: "center" }]}>
-                        <Car name={currentCar.brandId} km={currentCar.kilometers} onEdit={handleEdit} />
+                        <Car name={currentCar.id} km={currentCar.kilometers} onEdit={handleEdit} />
                       </Animated.View>
                     )}
 
                     {nextCar && (
                       <Animated.View style={[nextCarStyle, { position: "absolute", width: "100%", alignItems: "center" }]}>
-                        <Car name={nextCar.brandId} km={nextCar.kilometers} onEdit={handleEdit} />
+                        <Car name={nextCar.id} km={nextCar.kilometers} onEdit={handleEdit} />
                       </Animated.View>
                     )}
 

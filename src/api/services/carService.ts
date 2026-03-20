@@ -21,6 +21,11 @@ export const carApi = {
     return response.data;
   },
 
+  update: async (id: number, credentials: CarCredentials) => {
+    const response = await apiClient.put(`${API_URL}/cars/${id}`, credentials);
+    return response.data;
+  },
+
   getBrands: async () => {
     const response = await apiClient.get(`${API_URL}/brands`);
     return response.data;

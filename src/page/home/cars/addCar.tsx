@@ -42,7 +42,7 @@ if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental
 type Props = {
   isVisible: boolean;
   onClose: () => void;
-  initialData?: { brandId: number; modelId: number; year: number; kilometers: number } | null;
+  initialData?: { id: number; brandId: number; modelId: number; year: number; kilometers: number } | null;
 };
 
 type Brand = {
@@ -91,10 +91,13 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
 
   const onSubmit = async (data: InsertCarFormData) => {
       try {
-        console.log("Attempting car save...");
         setLoading(true);
         const validatedData = insertCarSchema.parse(data);
-        await carApi.register(validatedData);
+        if (isEditing) {
+          await carApi.update(initialData.id, validatedData);
+        } else {
+          await carApi.register(validatedData);
+        }
         navigation.reset({
           index: 0,
           routes: [{ name: 'Home' }],
