@@ -7,7 +7,7 @@ export default function Car({
   km,
   onEdit,
 }: {
-  name: string;
+  name: number;
   km: number;
   onEdit?: () => void;
 }) {

@@ -19,7 +19,7 @@ export default function HomeScreen() {
   const [isSheetCarOpen, setIsSheetCarOpen] = useState(false);
   const [isSheetExpensesOpen, setIsSheetExpensesOpen] = useState(false);
   const [editingDocData, setEditingDocData] = useState<{ name: string; expiryDate: Date } | null>(null);
-  const [editingCarData, setEditingCarData] = useState<{ brand: string; model: string; kilometers: number; year: number } | null>(null);
+  const [editingCarData, setEditingCarData] = useState<{ brandId: number; modelId: number; kilometers: number; year: number } | null>(null);
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
@@ -32,7 +32,7 @@ export default function HomeScreen() {
     setIsSheetDocOpen(true);
   };
 
-  const handleEditCar = (data: { brand: string; model: string; kilometers: number; year: number }) => {
+  const handleEditCar = (data: { brandId: number; modelId: number; kilometers: number; year: number }) => {
     setEditingCarData(data);
     setIsSheetCarOpen(true);
   };
@@ -89,7 +89,7 @@ export default function HomeScreen() {
       </ScrollView>
 
       <AddCar
-        key={editingCarData ? `car-${editingCarData.brand}-${Date.now()}` : "car-add"}
+        key={editingCarData ? `car-${editingCarData.brandId}-${editingCarData.modelId}-${Date.now()}` : "car-add"}
         isVisible={isSheetCarOpen}
         initialData={editingCarData}
         onClose={() => {

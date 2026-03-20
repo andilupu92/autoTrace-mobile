@@ -42,7 +42,7 @@ if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental
 type Props = {
   isVisible: boolean;
   onClose: () => void;
-  initialData?: { brand: string; model: string; year: number; kilometers: number } | null;
+  initialData?: { brandId: number; modelId: number; year: number; kilometers: number } | null;
 };
 
 type Brand = {
@@ -67,11 +67,11 @@ const insertCarSchema = z.object({
 type InsertCarFormData = z.input<typeof insertCarSchema>;
 
 export default function AddCar({ isVisible, onClose, initialData }: Props) {
-  const { control, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<InsertCarFormData>({
+  const { control, handleSubmit, reset, watch, formState: { errors } } = useForm<InsertCarFormData>({
       resolver: zodResolver(insertCarSchema),
       defaultValues: {
-        brandId: initialData?.brand ?? '',
-        modelId: initialData?.model ?? '',
+        brandId: initialData?.brandId ?? '',
+        modelId: initialData?.modelId ?? '',
         kilometers: initialData?.kilometers ?? '',
         year: initialData?.year ?? '',
     },
@@ -118,8 +118,8 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
       };
       if (isVisible && initialData) {
         reset({
-            brandId: initialData.brand,
-            modelId: initialData.model,
+            brandId: initialData.brandId,
+            modelId: initialData.modelId,
             kilometers: initialData.kilometers,
             year: initialData.year,
         });
@@ -132,7 +132,6 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
     useEffect(() => {
         if (!selectedBrand) return;
 
-        setValue("modelId", "");
         const fetchModels = async () => {
           const data = await carApi.getModels(Number(selectedBrand));
           setModels(data);
