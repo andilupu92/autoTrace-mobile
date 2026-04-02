@@ -19,7 +19,7 @@ export default function HomeScreen() {
   const [isSheetCarOpen, setIsSheetCarOpen] = useState(false);
   const [isSheetExpensesOpen, setIsSheetExpensesOpen] = useState(false);
   const [editingDocData, setEditingDocData] = useState<{ name: string; expiryDate: Date } | null>(null);
-  const [editingCarData, setEditingCarData] = useState<{ id: number; brandId: number; modelId: number; kilometers: number; year: number } | null>(null);
+  const [editingCarData, setEditingCarData] = useState<{ id: number; brandId: number; brandName: string; modelId: number; modelName: string; kilometers: number; year: number } | null>(null);
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
@@ -32,7 +32,7 @@ export default function HomeScreen() {
     setIsSheetDocOpen(true);
   };
 
-  const handleEditCar = (data: { id: number; brandId: number; modelId: number; kilometers: number; year: number }) => {
+  const handleEditCar = (data: { id: number; brandId: number; brandName: string; modelId: number; modelName: string; kilometers: number; year: number }) => {
     setEditingCarData(data);
     setIsSheetCarOpen(true);
   };

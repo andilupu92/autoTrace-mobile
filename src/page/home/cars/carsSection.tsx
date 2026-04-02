@@ -21,7 +21,7 @@ import { carApi } from "@/src/api/services/carService";
 
 type CarsSectionProps = {
   onAddCar: () => void;
-  onEditCar: (data: { id: number; brandId: number; modelId: number; kilometers: number; year: number }) => void;
+  onEditCar: (data: { id: number; brandId: number; brandName: string; modelId: number; modelName: string; kilometers: number; year: number }) => void;
 };
 
 const { width } = Dimensions.get("window");
@@ -145,7 +145,9 @@ export default function CarsSection({ onAddCar, onEditCar }: CarsSectionProps) {
     onEditCar({
       id: car.id,
       brandId: car.brandId,
+      brandName: car.brandName,
       modelId: car.modelId,
+      modelName: car.modelName,
       kilometers: car.kilometers,
       year: car.year,
     });

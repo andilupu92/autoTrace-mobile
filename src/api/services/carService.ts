@@ -11,6 +11,16 @@ export interface CarCredentials {
 
 export const carApi = {
 
+  getBrands: async () => {
+    const response = await apiClient.get(`${API_URL}/brands`);
+    return response.data;
+  },
+
+  getModels: async (brand: number) => {
+    const response = await apiClient.get(`${API_URL}/models/${brand}`);
+    return response.data;
+  },
+
   cars: async () => {
     const response = await apiClient.get(`${API_URL}/cars`);
     return response.data;
@@ -26,13 +36,8 @@ export const carApi = {
     return response.data;
   },
 
-  getBrands: async () => {
-    const response = await apiClient.get(`${API_URL}/brands`);
-    return response.data;
-  },
-
-  getModels: async (brand: number) => {
-    const response = await apiClient.get(`${API_URL}/models/${brand}`);
+  delete: async (id: number) => {
+    const response = await apiClient.delete(`${API_URL}/cars/${id}`);
     return response.data;
   }
 

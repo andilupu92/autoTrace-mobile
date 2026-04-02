@@ -7,6 +7,7 @@ import {
   Pressable,
   StyleSheet,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,6 +31,7 @@ import { useEffect } from "react";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { BlurView } from "expo-blur";
 import { carApi } from "@/src/api/services/carService";
+import { Ionicons } from "@expo/vector-icons";
 import { FloatingSelect } from "@/components/ui/floating-select";
 import { RootStackParamList } from "@/src/navigation/AppNavigator";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -42,7 +44,7 @@ if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental
 type Props = {
   isVisible: boolean;
   onClose: () => void;
-  initialData?: { id: number; brandId: number; modelId: number; year: number; kilometers: number } | null;
+  initialData?: { id: number; brandId: number; brandName: string; modelId: number; modelName: string; year: number; kilometers: number } | null;
 };
 
 type Brand = {
@@ -79,8 +81,7 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
   });
   const sheetHeightRef = useRef(SCREEN_HEIGHT * 0.63);
   const translateY = useSharedValue(SCREEN_HEIGHT);
-  const navigation =
-      useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const selectedBrand = watch("brandId");
   const backdropOpacity = useSharedValue(0);
   const dragContext = useSharedValue(0);
@@ -102,17 +103,44 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
           index: 0,
           routes: [{ name: 'Home' }],
         });
-        console.log("Car saved successfully");
         onClose();
       } catch (error: any) {
         const errorMessage = error?.response?.data?.message 
           || error?.message 
           || 'An error occurred during car save';
         console.error('Car save error:', errorMessage);
-    } finally {
-      setLoading(false);
-    }
+      } finally {
+        setLoading(false);
+      }
   };
+
+  const handleDelete = async () => {
+      Alert.alert(
+      "Delete Car",
+      `Are you sure you want to delete "${initialData?.brandName?.toUpperCase()} ${initialData?.modelName?.toUpperCase()}"?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Delete", style: "destructive", onPress: onDelete },
+      ]
+    );
+  };
+
+  const onDelete = async () => {
+      try {
+      await carApi.delete(initialData!.id);
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Home' }],
+      });
+      onClose();
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message
+        || error?.message
+        || 'An error occurred while deleting the car';
+      console.error('Car delete error:', errorMessage);
+      Alert.alert('Error', errorMessage);
+    }
+  }
 
   useEffect(() => {
       const fetchBrands = async () => {
@@ -134,12 +162,10 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
 
     useEffect(() => {
         if (!selectedBrand) return;
-
         const fetchModels = async () => {
           const data = await carApi.getModels(Number(selectedBrand));
           setModels(data);
         };
-
         fetchModels();
     }, [selectedBrand]);
 
@@ -168,7 +194,6 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
         backdropOpacity.value = withTiming(0, { duration: 280 });
       };
     
-      // Gesture de drag (swipe down pentru dismiss)
       const panGesture = Gesture.Pan()
         .onStart(() => {
           dragContext.value = translateY.value;
@@ -176,7 +201,6 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
         .onUpdate((event) => {
           const newY = dragContext.value + event.translationY;
           translateY.value = Math.max(0, newY);
-    
           backdropOpacity.value = interpolate(
             translateY.value,
             [0, sheetHeightRef.current],
@@ -206,179 +230,190 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
 
   return (
     <>
-    {/* Blur backdrop */}
-          <Animated.View
-            style={[StyleSheet.absoluteFillObject, animatedBackdropStyle]}
-            pointerEvents="auto"
-          >
-            <BlurView
-              intensity={Platform.OS === "ios" ? 30 : 15}
-              tint="light"
-              style={StyleSheet.absoluteFillObject}
-              experimentalBlurMethod="dimezisBlurView"
-            >
-              <Pressable
-                style={StyleSheet.absoluteFillObject}
-                onPress={closeSheet}
-              />
-            </BlurView>
-          </Animated.View>
-    
-          {/* Bottom Sheet */}
-          <GestureDetector gesture={panGesture}>
-            <Animated.View
-              style={[styles.sheet, animatedSheetStyle]}
-              className="bg-white"
-              onLayout={(e) => {
-                const measuredHeight = e.nativeEvent.layout.height;
-                sheetHeightRef.current = measuredHeight;
-                if (isVisible) {
-                  translateY.value = withSpring(0, { damping: 22, stiffness: 160, mass: 0.8 });
-                  backdropOpacity.value = withTiming(1, { duration: 320 });
-                } else {
-                  translateY.value = measuredHeight;
-                }
-              }}
-            >
-              {/* Handle indicator */}
-              <View className="items-center pt-3 pb-1">
-                <View className="w-10 h-[5px] bg-gray-200 rounded-full" />
-              </View>
-    
-              {/* Header */}
-              <View className="flex-row items-center justify-between px-5 pt-3 pb-4 border-b border-gray-100">
-                <Text className="text-base font-semibold text-gray-900">
-                  {isEditing ? "Edit Car" : "Add Car"}
-                </Text>
+      {/* Blur backdrop */}
+      <Animated.View
+        style={[StyleSheet.absoluteFillObject, animatedBackdropStyle]}
+        pointerEvents="auto"
+      >
+        <BlurView
+          intensity={Platform.OS === "ios" ? 30 : 15}
+          tint="light"
+          style={StyleSheet.absoluteFillObject}
+          experimentalBlurMethod="dimezisBlurView"
+        >
+          <Pressable
+            style={StyleSheet.absoluteFillObject}
+            onPress={closeSheet}
+          />
+        </BlurView>
+      </Animated.View>
+
+      {/* Bottom Sheet */}
+      <GestureDetector gesture={panGesture}>
+        <Animated.View
+          style={[styles.sheet, animatedSheetStyle]}
+          className="bg-white"
+          onLayout={(e) => {
+            const measuredHeight = e.nativeEvent.layout.height;
+            sheetHeightRef.current = measuredHeight;
+            if (isVisible) {
+              translateY.value = withSpring(0, { damping: 22, stiffness: 160, mass: 0.8 });
+              backdropOpacity.value = withTiming(1, { duration: 320 });
+            } else {
+              translateY.value = measuredHeight;
+            }
+          }}
+        >
+          {/* Handle indicator */}
+          <View className="items-center pt-3 pb-1">
+            <View className="w-10 h-[5px] bg-gray-200 rounded-full" />
+          </View>
+
+          {/* ─── HEADER ─────────────────────────────────────────────────────── */}
+          <View className="flex-row items-center justify-between px-5 pt-3 pb-4 border-b border-gray-100">
+            <Text className="text-base font-semibold text-gray-900">
+              {isEditing ? "Edit Car" : "Add Car"}
+            </Text>
+
+            <HStack space="sm" className="items-center">
+              {isEditing && (
                 <Pressable
-                  onPress={closeSheet}
-                  className="w-8 h-8 items-center justify-center rounded-full bg-gray-100 active:bg-gray-200"
+                  onPress={handleDelete}
+                  className="w-8 h-8 items-center justify-center rounded-full bg-red-100 active:bg-red-200"
                 >
-                  <Text className="text-gray-500 text-sm font-medium">✕</Text>
+                  <Ionicons name="trash-outline" size={20} color="red" />
                 </Pressable>
-              </View>
+              )}
 
-              {/* Conținut */}
-              <View className="flex-1 px-5 pt-6 gap-5">
+              <Pressable
+                onPress={closeSheet}
+                className="w-8 h-8 items-center justify-center rounded-full bg-gray-100 active:bg-gray-200"
+              >
+                <Ionicons name="close" size={20} color="gray" />
+              </Pressable>
+            </HStack>
+          </View>
+          {/* ─────────────────────────────────────────────────────────────────── */}
 
-                {/* --- BRAND --- */}
-                <FormControl isInvalid={!!errors.brandId} style={{ zIndex: 999 }}>
-                  <Controller
-                    control={control}
-                    name="brandId"
-                    render={({ field: { onChange, value } }) => (
-                      <FloatingSelect
-                        label="Brand"
-                        value={value}
-                        onValueChange={onChange}
-                        options={brands.map((b) => ({ label: b.name, value: b.id }))}
-                        isInvalid={!!errors.brandId}
-                      />
-                    )}
+          <View className="flex-1 px-5 pt-6 gap-5">
+
+            {/* --- BRAND --- */}
+            <FormControl isInvalid={!!errors.brandId} style={{ zIndex: 999 }}>
+              <Controller
+                control={control}
+                name="brandId"
+                render={({ field: { onChange, value } }) => (
+                  <FloatingSelect
+                    label="Brand"
+                    value={value}
+                    onValueChange={onChange}
+                    options={brands.map((b) => ({ label: b.name, value: b.id }))}
+                    isInvalid={!!errors.brandId}
                   />
-                  <FormControlError>
-                    <FormControlErrorText className="ml-2 mt-1 text-xs text-red-500">
-                      {errors.brandId?.message}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </FormControl>
+                )}
+              />
+              <FormControlError>
+                <FormControlErrorText className="ml-2 mt-1 text-xs text-red-500">
+                  {errors.brandId?.message}
+                </FormControlErrorText>
+              </FormControlError>
+            </FormControl>
 
-                {/* --- MODEL --- */}
-                <FormControl isInvalid={!!errors.modelId} style={{ zIndex: 998 }}>
-                  <Controller
-                    control={control}
-                    name="modelId"
-                    render={({ field: { onChange, value } }) => (
-                      <FloatingSelect
-                        label="Model"
-                        value={value}
-                        onValueChange={onChange}
-                        options={models.map((m) => ({ label: m.name, value: m.id }))}
-                        isInvalid={!!errors.modelId}
-                      />
-                    )}
+            {/* --- MODEL --- */}
+            <FormControl isInvalid={!!errors.modelId} style={{ zIndex: 998 }}>
+              <Controller
+                control={control}
+                name="modelId"
+                render={({ field: { onChange, value } }) => (
+                  <FloatingSelect
+                    label="Model"
+                    value={value}
+                    onValueChange={onChange}
+                    options={models.map((m) => ({ label: m.name, value: m.id }))}
+                    isInvalid={!!errors.modelId}
                   />
-                  <FormControlError>
-                    <FormControlErrorText className="ml-2 mt-1 text-xs text-red-500">
-                      {errors.modelId?.message}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </FormControl>
+                )}
+              />
+              <FormControlError>
+                <FormControlErrorText className="ml-2 mt-1 text-xs text-red-500">
+                  {errors.modelId?.message}
+                </FormControlErrorText>
+              </FormControlError>
+            </FormControl>
 
-                {/* --- KILOMETERS --- */}
-                <FormControl isInvalid={!!errors.kilometers}>
-                  <Controller
-                    control={control}
-                    name="kilometers"
-                    render={({ field: { onChange, value, onBlur } }) => (
-                      <FloatingInput
-                        label="Kilometers"
-                        value={value}
-                        onChangeText={onChange}
-                        onBlur={onBlur}
-                        isInvalid={!!errors.kilometers}
-                        autoCapitalize="words"
-                      />
-                    )}
+            {/* --- KILOMETERS --- */}
+            <FormControl isInvalid={!!errors.kilometers}>
+              <Controller
+                control={control}
+                name="kilometers"
+                render={({ field: { onChange, value, onBlur } }) => (
+                  <FloatingInput
+                    label="Kilometers"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    isInvalid={!!errors.kilometers}
+                    autoCapitalize="words"
                   />
-                  <FormControlError>
-                    <FormControlErrorText className="ml-2 mt-1 text-xs text-red-500">
-                      {errors.kilometers?.message}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </FormControl>
+                )}
+              />
+              <FormControlError>
+                <FormControlErrorText className="ml-2 mt-1 text-xs text-red-500">
+                  {errors.kilometers?.message}
+                </FormControlErrorText>
+              </FormControlError>
+            </FormControl>
 
-                {/* --- YEAR --- */}
-                <FormControl isInvalid={!!errors.year}>
-                  <Controller
-                    control={control}
-                    name="year"
-                    render={({ field: { onChange, value, onBlur } }) => (
-                      <FloatingInput
-                        label="Year"
-                        value={value}
-                        onChangeText={onChange}
-                        onBlur={onBlur}
-                        isInvalid={!!errors.year}
-                        autoCapitalize="words"
-                      />
-                    )}
+            {/* --- YEAR --- */}
+            <FormControl isInvalid={!!errors.year}>
+              <Controller
+                control={control}
+                name="year"
+                render={({ field: { onChange, value, onBlur } }) => (
+                  <FloatingInput
+                    label="Year"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    isInvalid={!!errors.year}
+                    autoCapitalize="words"
                   />
-                  <FormControlError>
-                    <FormControlErrorText className="ml-2 mt-1 text-xs text-red-500">
-                      {errors.year?.message}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </FormControl>
+                )}
+              />
+              <FormControlError>
+                <FormControlErrorText className="ml-2 mt-1 text-xs text-red-500">
+                  {errors.year?.message}
+                </FormControlErrorText>
+              </FormControlError>
+            </FormControl>
 
-                {/* Save Button */}
-                <View className="px-5 pb-8 pt-4">
-                  <Button
-                    size="xl"
-                    className="bg-black dark:bg-blue-600 h-16 rounded-2xl shadow-lg shadow-gray-200 dark:shadow-none active:scale-[0.98]"
-                    isDisabled={isLoading}
-                    onPress={handleSubmit(onSubmit)}
-                  >
-                    <HStack space="md" className="items-center justify-center">
-                      {isLoading ? (
-                        <ActivityIndicator
-                          size="small"
-                          color={Platform.OS === 'ios' ? undefined : '#FFFFFF'}
-                          className="text-white dark:text-blue-400 mr-2"
-                        />
-                      ) : null}
-                        <ButtonText className="font-bold dark:text-white text-lg">
-                          {isLoading ? 'Se salvează...' : isEditing ? 'Update' : 'Save'}
-                        </ButtonText>
-                      </HStack>
-                    </Button>
-                </View>
-            
-              </View>
+            {/* Save Button */}
+            <View className="px-5 pb-8 pt-4">
+              <Button
+                size="xl"
+                className="bg-black dark:bg-blue-600 h-16 rounded-2xl shadow-lg shadow-gray-200 dark:shadow-none active:scale-[0.98]"
+                isDisabled={isLoading}
+                onPress={handleSubmit(onSubmit)}
+              >
+                <HStack space="md" className="items-center justify-center">
+                  {isLoading ? (
+                    <ActivityIndicator
+                      size="small"
+                      color={Platform.OS === 'ios' ? undefined : '#FFFFFF'}
+                      className="text-white dark:text-blue-400 mr-2"
+                    />
+                  ) : null}
+                  <ButtonText className="font-bold dark:text-white text-lg">
+                    {isLoading ? 'Se salvează...' : isEditing ? 'Update' : 'Save'}
+                  </ButtonText>
+                </HStack>
+              </Button>
+            </View>
+          </View>
         </Animated.View>
       </GestureDetector>
     </>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
