@@ -7,7 +7,7 @@ export default function Car({
   km,
   onEdit,
 }: {
-  name: number;
+  name: string;
   km: number;
   onEdit?: () => void;
 }) {
@@ -33,13 +33,13 @@ export default function Car({
             top: 7,
             right: 7,
             padding: 4,
-            opacity: 0.3,
+            opacity: 0.2,
           }}
         >
           <Ionicons name="pencil" size={44} color="#9CA3AF" />
         </View>
 
-        <Text className={`font-bold text-center px-1 text-orange-500 text-[13px]`}>
+        <Text className={`font-bold text-center px-1 text-orange-500 text-[11px]`}>
           {name}
         </Text>
       </TouchableOpacity>

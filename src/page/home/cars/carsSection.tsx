@@ -32,7 +32,9 @@ const SWIPE_THRESHOLD = 50;
 type CarItem = {
   id: number;
   brandId: number;
+  brandName: string;
   modelId: number;
+  modelName: string;
   kilometers: number;
   year: number;
 };
@@ -209,19 +211,19 @@ export default function CarsSection({ onAddCar, onEditCar }: CarsSectionProps) {
                     
                     {prevCar && (
                       <Animated.View style={[prevCarStyle, { position: "absolute", width: "100%", alignItems: "center" }]}>
-                        <Car name={prevCar.id} km={prevCar.kilometers} onEdit={handleEdit} />
+                        <Car name={prevCar.brandName + " " + prevCar.modelName} km={prevCar.kilometers} onEdit={handleEdit} />
                       </Animated.View>
                     )}
 
                     {currentCar && (
                       <Animated.View style={[currentCarStyle, { position: "absolute", width: "100%", alignItems: "center" }]}>
-                        <Car name={currentCar.id} km={currentCar.kilometers} onEdit={handleEdit} />
+                        <Car name={currentCar.brandName + " " + currentCar.modelName} km={currentCar.kilometers} onEdit={handleEdit} />
                       </Animated.View>
                     )}
 
                     {nextCar && (
                       <Animated.View style={[nextCarStyle, { position: "absolute", width: "100%", alignItems: "center" }]}>
-                        <Car name={nextCar.id} km={nextCar.kilometers} onEdit={handleEdit} />
+                        <Car name={nextCar.brandName + " " + nextCar.modelName} km={nextCar.kilometers} onEdit={handleEdit} />
                       </Animated.View>
                     )}
 
