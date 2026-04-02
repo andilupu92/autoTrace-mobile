@@ -8,7 +8,7 @@ import CarsSection from "./cars/carsSection";
 import HeaderSection from "../../utils/headerSection";
 import DocumentCard from "./documents/document";
 import ExpensesChart from "./expenses/expensesChart";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import AddDocuments from "./documents/addDocuments";
 import Header from "./header";
 import AddCar from "./cars/addCar";
@@ -20,12 +20,17 @@ export default function HomeScreen() {
   const [isSheetExpensesOpen, setIsSheetExpensesOpen] = useState(false);
   const [editingDocData, setEditingDocData] = useState<{ name: string; expiryDate: Date } | null>(null);
   const [editingCarData, setEditingCarData] = useState<{ id: number; brandId: number; brandName: string; modelId: number; modelName: string; kilometers: number; year: number } | null>(null);
+  const [currentCarLogo, setCurrentCarLogo] = useState<string | null>(null);
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const openUserDetails = () => {
     navigation.navigate("UserDetails");
   };
+
+  const handleCarChange = useCallback((logoUrl: string) => {
+    setCurrentCarLogo(logoUrl);
+  }, []);
 
   const handleEditDoc = (data: { name: string; expiryDate: Date }) => {
     setEditingDocData(data);
@@ -44,7 +49,7 @@ export default function HomeScreen() {
   return (
     <View style={{ flex: 1 }}>
 
-      <Header openUserDetails={openUserDetails} />
+      <Header openUserDetails={openUserDetails} logoUrl={currentCarLogo} />
 
       <ScrollView
         className="flex-1 bg-gray-150"
@@ -53,7 +58,7 @@ export default function HomeScreen() {
       >
 
        <View className="mt-4">
-          <CarsSection onAddCar={() => setIsSheetCarOpen(true)} onEditCar={handleEditCar} />
+          <CarsSection onAddCar={() => setIsSheetCarOpen(true)} onEditCar={handleEditCar} onCarChange={handleCarChange}/>
         </View>
 
         <View className="px-6 mt-12">

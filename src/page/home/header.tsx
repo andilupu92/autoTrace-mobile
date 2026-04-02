@@ -11,7 +11,7 @@ const { width } = Dimensions.get("window");
 const HEADER_HEIGHT = 180;
 const DARK_HEADER_HEIGHT = 150;
 
-export default function Header({ openUserDetails }: { openUserDetails: () => void }) {
+export default function Header({ openUserDetails, logoUrl }: { openUserDetails: () => void; logoUrl: string | null }) {
   return (
     <View style={{ backgroundColor: "white" }}>
       {/* Orange curved header */}
@@ -24,13 +24,15 @@ export default function Header({ openUserDetails }: { openUserDetails: () => voi
         />
       </Svg>
 
-      <Box className="absolute w-full px-6 flex-row justify-between items-center"
+      <Box className="absolute w-full px-7 flex-row justify-between items-center"
         style={{ top: HEADER_HEIGHT * 0.35 }}>
         
-        <VStack>
-          <Heading className="text-black text-xl font-light">
-            <Text className="font-bold text-xl">Hello, </Text>
-            <Text className="font-bold text-bold text-2xl">Andrei</Text>
+        <VStack space="xs">
+          <Text className="text-orange-900 text-base font-normal tracking-wide opacity-70">
+            Hello,
+          </Text>
+          <Heading className="text-black text-xl font-bold tracking-tight" style={{ marginTop: -4 }}>
+            Andrei
           </Heading>
         </VStack>
 
@@ -52,7 +54,7 @@ export default function Header({ openUserDetails }: { openUserDetails: () => voi
       <View className="absolute items-center" style={{ top: DARK_HEADER_HEIGHT - 50, width: width, zIndex: 10 }}>
         <View className="w-32 h-32 rounded-full border-4 border-white overflow-hidden bg-gray-200 shadow-lg">
           <Image 
-            source={{ uri: "https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=500&q=80" }} 
+            source={{ uri: logoUrl || "Not found" }} 
             className="w-full h-full" 
             alt="Car Avatar"
           />

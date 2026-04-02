@@ -22,6 +22,7 @@ import { carApi } from "@/src/api/services/carService";
 type CarsSectionProps = {
   onAddCar: () => void;
   onEditCar: (data: { id: number; brandId: number; brandName: string; modelId: number; modelName: string; kilometers: number; year: number }) => void;
+  onCarChange?: (logoUrl: string) => void;
 };
 
 const { width } = Dimensions.get("window");
@@ -33,13 +34,14 @@ type CarItem = {
   id: number;
   brandId: number;
   brandName: string;
+  logoUrl: string;
   modelId: number;
   modelName: string;
   kilometers: number;
   year: number;
 };
 
-export default function CarsSection({ onAddCar, onEditCar }: CarsSectionProps) {
+export default function CarsSection({ onAddCar, onEditCar, onCarChange }: CarsSectionProps) {
   const [loading, setLoading] = useState(false);
   const [cars, setCars]                 = useState<CarItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -59,6 +61,18 @@ export default function CarsSection({ onAddCar, onEditCar }: CarsSectionProps) {
     };
         fetchCars();
   }, []);
+
+  useEffect(() => {
+    if (cars.length > 0) {
+      onCarChange?.(cars[0].logoUrl);
+    }
+  }, [cars]);
+
+  useEffect(() => {
+    if (cars.length > 0) {
+      onCarChange?.(cars[currentIndex].logoUrl);
+    }
+  }, [currentIndex]);
 
   const total = cars.length;
 

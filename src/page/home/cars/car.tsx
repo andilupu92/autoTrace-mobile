@@ -45,7 +45,7 @@ export default function Car({
       </TouchableOpacity>
       
       <Text className={`text-[10px] font-bold uppercase mt-3 tracking-tighter text-orange-400`}>
-        {km} Km
+        {km.toLocaleString("ro-RO")} Km
       </Text>
     </View>
   );
