@@ -77,7 +77,7 @@ const [documents, setDocuments] = useState<Document[]>([]);
   };
 
   const handleViewAllDocuments = () => {
-    navigation.navigate("AllDocuments"); 
+    navigation.navigate("AllDocuments", { documents }); 
   };
 
   return (
@@ -118,16 +118,16 @@ const [documents, setDocuments] = useState<Document[]>([]);
                 />
               ))
             )}
-
-            <Pressable 
-              onPress={handleViewAllDocuments}
-              className="mt-4 bg-white py-2 px-6 rounded-full self-center shadow-sm flex-row items-center justify-center border border-gray-100"
-            >
-              <Text className="text-orange-500 font-medium text-sm">
-                Vezi toate documentele
-              </Text>
-            </Pressable>
-
+            {documents.length > 0 && !loadingDocs && (
+              <Pressable 
+                onPress={handleViewAllDocuments}
+                className="mt-4 bg-white py-2 px-6 rounded-full self-center shadow-sm flex-row items-center justify-center border border-gray-100"
+              >
+                <Text className="text-orange-500 font-medium text-sm">
+                  Vezi toate documentele
+                </Text>
+              </Pressable>
+            )}
           </View>
         </View>
 

@@ -6,25 +6,23 @@ import DocumentCard from "./document";
 import HeaderSection from "@/src/utils/headerSection";
 import { useState } from "react";
 import AddDocuments from "./addDocuments";
+import { useRoute, RouteProp } from "@react-navigation/native";
+import { RootStackParamList } from "@/src/navigation/AppNavigator";
+import DynamicIcon from "@/src/utils/dynamicIcon";
 
-type DocumentItem = {
-  icon: string;
-  iconBg: string;
-  name: string;
+type Document = {
+  id: number;
+  documentCategoryId: number;
+  documentCategoryName: string;
+  expiryDate: string;
   daysRemaining: number;
-  expiryDate: Date;
+  documentCategoryIconName: string;
+  documentCategoryIconLibrary: string;
 };
 
-const documents: DocumentItem[] = [
-  { icon: "⛽", iconBg: "#FFF3EB", name: "RCA Insurance",        daysRemaining: 2,   expiryDate: new Date("2026-03-14") },
-  { icon: "🛠️", iconBg: "#F3F4F6", name: "ITP Inspection",       daysRemaining: 7,   expiryDate: new Date("2026-03-19") },
-  { icon: "🛣️", iconBg: "#F3F4F6", name: "Road Tax",             daysRemaining: 24,  expiryDate: new Date("2026-04-05") },
-  { icon: "⛽", iconBg: "#FFF3EB", name: "Casco Insurance",       daysRemaining: 145, expiryDate: new Date("2026-08-04") },
-  { icon: "🎫", iconBg: "#F3F4F6", name: "Vignette (Rovinietă)", daysRemaining: 210, expiryDate: new Date("2026-10-08") },
-  { icon: "⚕️", iconBg: "#F3F4F6", name: "Medical Kit",          daysRemaining: 400, expiryDate: new Date("2027-04-16") },
-];
-
 export default function AllDocumentsScreen() {
+  const route = useRoute<RouteProp<RootStackParamList, "AllDocuments">>();
+  const { documents } = route.params;
   const navigation = useNavigation();
   const [isSheetDocOpen, setIsSheetDocOpen] = useState(false);
   const [editingDocData, setEditingDocData] = useState<{ name: string; expiryDate: Date } | null>(null);
@@ -76,12 +74,13 @@ export default function AllDocumentsScreen() {
         <View className="mt-2 flex-col gap-4">
           {documents.map((doc) => (
             <DocumentCard
-              key={doc.name}
-              icon={doc.icon}
-              iconBg={doc.iconBg}
-              name={doc.name}
+              key={doc.id}
+              icon={doc.documentCategoryIconName}
+              library={doc.documentCategoryIconLibrary}
+              iconBg="#e6eff5"
+              name={doc.documentCategoryName}
               daysRemaining={doc.daysRemaining}
-              expiryDate={doc.expiryDate}
+              expiryDate={new Date(doc.expiryDate)}
               onEdit={handleEditDoc}
             />
           ))}
@@ -102,7 +101,7 @@ export default function AllDocumentsScreen() {
   );
 }
 
-function AlertBanner({ docs }: { docs: DocumentItem[] }) {
+function AlertBanner({ docs }: { docs: Document[] }) {
   const urgent = docs.filter((d) => d.daysRemaining <= 3);
   const soon   = docs.filter((d) => d.daysRemaining > 3 && d.daysRemaining <= 7);
 
@@ -123,8 +122,13 @@ function AlertBanner({ docs }: { docs: DocumentItem[] }) {
                 : `${urgent.length} documente expiră în mai puțin de 3 zile!`}
             </Text>
             {urgent.map((d) => (
-              <Text key={d.name} className="text-red-500 text-xs">
-                • {d.icon} {d.name} — {d.daysRemaining === 0 ? "azi!" : `${d.daysRemaining} ${d.daysRemaining === 1 ? "zi" : "zile"}`}
+              <Text key={d.id} className="text-red-500 text-xs">
+                • <DynamicIcon 
+                    library={d.documentCategoryIconLibrary} 
+                    name={d.documentCategoryIconName}
+                    size={12}
+                    color="#668df8"
+                  />{" "} {d.documentCategoryName} — {d.daysRemaining === 0 ? "azi!" : `${d.daysRemaining} ${d.daysRemaining === 1 ? "zi" : "zile"}`}
               </Text>
             ))}
           </View>
@@ -142,8 +146,8 @@ function AlertBanner({ docs }: { docs: DocumentItem[] }) {
                 : `${soon.length} documente expiră în curând (7 zile).`}
             </Text>
             {soon.map((d) => (
-              <Text key={d.name} className="text-orange-500 text-xs">
-                • {d.icon} {d.name} — {d.daysRemaining} zile
+              <Text key={d.id} className="text-orange-500 text-xs">
+                • {d.documentCategoryIconName} {d.documentCategoryName} — {d.daysRemaining} zile
               </Text>
             ))}
           </View>

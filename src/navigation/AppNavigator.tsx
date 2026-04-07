@@ -7,13 +7,23 @@ import UserDetailsScreen from '../page/home/profile/userDetails';
 import AllDocumentsScreen from '../page/home/documents/allDocuments';
 import AllExpensesScreen from '../page/home/expenses/allExpenses';
 
+type Document = {
+  id: number;
+  documentCategoryId: number;
+  documentCategoryName: string;
+  expiryDate: string;
+  daysRemaining: number;
+  documentCategoryIconName: string;
+  documentCategoryIconLibrary: string;
+};
+
 export type RootStackParamList = {
   Login: undefined;
   Home: undefined;
   ForgotPassword: undefined;
   SignUp: undefined;
   UserDetails: undefined;
-  AllDocuments: undefined;
+  AllDocuments: { documents: Document[] };
   AllExpenses: undefined;
 };
 
