@@ -17,6 +17,8 @@ import { Box } from "@/components/ui/box";
 import DynamicIcon from "@/src/utils/dynamicIcon";
 
 export default function DocumentCard({
+  documentCategoryId,
+  documentId,
   icon,
   library,
   iconBg,
@@ -27,6 +29,8 @@ export default function DocumentCard({
   onEdit,
   onDelete,
 }: {
+  documentCategoryId: number;
+  documentId: number;
   icon: string;
   library: string;
   iconBg: string;
@@ -34,7 +38,7 @@ export default function DocumentCard({
   expiryDate: Date;
   daysRemaining: number;
   totalDays?: number;
-  onEdit?: (data: { name: string; expiryDate: Date }) => void;
+  onEdit?: (data: { documentCategoryId: number; expiryDate: Date; documentId: number }) => void;
   onDelete?: () => void;
 }) {
   const progress = totalDays - daysRemaining;
@@ -86,7 +90,7 @@ export default function DocumentCard({
   const handleEdit = () => {
     swipeableRef.current?.close();
     setMenuVisible(false);
-    onEdit?.({ name, expiryDate });
+    onEdit?.({ documentCategoryId, expiryDate, documentId });
   };
 
   const handleDelete = () => {

@@ -30,11 +30,11 @@ export default function HomeScreen() {
   const [isSheetDocOpen, setIsSheetDocOpen] = useState(false);
   const [isSheetCarOpen, setIsSheetCarOpen] = useState(false);
   const [isSheetExpensesOpen, setIsSheetExpensesOpen] = useState(false);
-  const [editingDocData, setEditingDocData] = useState<{ name: string; expiryDate: Date } | null>(null);
+  const [editingDocData, setEditingDocData] = useState<{ documentCategoryId: number; expiryDate: Date; documentId: number } | null>(null);
   const [editingCarData, setEditingCarData] = useState<{ id: number; brandId: number; brandName: string; modelId: number; modelName: string; kilometers: number; year: number } | null>(null);
   const [currentCarLogo, setCurrentCarLogo] = useState<string | null>(null);
-  const [currentCarId, setCurrentCarId] = useState<number | null>(null);
-const [documents, setDocuments] = useState<Document[]>([]);
+  const [currentCarId, setCurrentCarId] = useState<number>(0);
+  const [documents, setDocuments] = useState<Document[]>([]);
   const [loadingDocs, setLoadingDocs] = useState(false);
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -66,7 +66,7 @@ const [documents, setDocuments] = useState<Document[]>([]);
     fetchDocuments();
   }, [currentCarId]);
 
-  const handleEditDoc = (data: { name: string; expiryDate: Date }) => {
+  const handleEditDoc = (data: { documentCategoryId: number; expiryDate: Date; documentId: number }) => {
     setEditingDocData(data);
     setIsSheetDocOpen(true);
   };
@@ -77,7 +77,7 @@ const [documents, setDocuments] = useState<Document[]>([]);
   };
 
   const handleViewAllDocuments = () => {
-    navigation.navigate("AllDocuments", { documents }); 
+    navigation.navigate("AllDocuments", { documents, currentCarId }); 
   };
 
   return (
@@ -108,6 +108,8 @@ const [documents, setDocuments] = useState<Document[]>([]);
               documents.map((doc) => (
                 <DocumentCard
                   key={doc.id}
+                  documentId={doc.id}
+                  documentCategoryId={doc.documentCategoryId}
                   icon={doc.documentCategoryIconName}
                   library={doc.documentCategoryIconLibrary}
                   iconBg="#e6eff5"
@@ -151,9 +153,10 @@ const [documents, setDocuments] = useState<Document[]>([]);
       />
 
       <AddDocuments
-        key={editingDocData ? `doc-${editingDocData.name}-${Date.now()}` : "doc-add"}
+        key={editingDocData ? `doc-${editingDocData.documentCategoryId}-${Date.now()}` : "doc-add"}
         isVisible={isSheetDocOpen}
         initialData={editingDocData}
+        carId={currentCarId}
         onClose={() => {
           setIsSheetDocOpen(false);
           setEditingDocData(null);

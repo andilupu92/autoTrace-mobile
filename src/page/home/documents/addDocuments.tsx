@@ -19,7 +19,6 @@ import Animated, {
 import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
 import { Button, ButtonText } from '@/components/ui/button';
-import FloatingInput from '@/components/ui/floating-input';
 import { 
   FormControl,
   FormControlError, 
@@ -33,62 +32,88 @@ import { BlurView } from "expo-blur";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useEffect, useRef } from "react";
+import { FloatingSelect } from "@/components/ui/floating-select";
+import { documentApi } from "@/src/api/services/docService";
+import { RootStackParamList } from "@/src/navigation/AppNavigator";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useNavigation } from "@react-navigation/native";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 type Props = {
   isVisible: boolean;
   onClose: () => void;
-  initialData?: { name: string; expiryDate: Date } | null;
+  initialData?: { documentCategoryId: number; expiryDate: Date; documentId: number } | null;
+  carId: number;
+};
+
+type DocumentCategory = {
+  id: number;
+  name: string;
 };
 
 const documentSchema = z.object({
-  documentName: z
-    .string()
-    .min(1, 'Document is required')
-    .min(3, 'Minim 3 caractere'),
+  documentCategoryId: z.coerce.number().min(1, "Document is required"),
   expiryDate: z
     .date({ message: 'Data expirării este obligatorie' })
     .min(new Date(), 'Data trebuie să fie în viitor'),
 });
 
-type DocumentFormData = z.infer<typeof documentSchema>;
+type DocumentFormData = z.input<typeof documentSchema>;
 
-export default function AddDocuments({ isVisible, onClose, initialData }: Props) {
+export default function AddDocuments({ isVisible, onClose, initialData, carId }: Props) {
   const sheetHeightRef = useRef(SCREEN_HEIGHT * 0.63);
   const translateY = useSharedValue(SCREEN_HEIGHT);
   const backdropOpacity = useSharedValue(0);
   const dragContext = useSharedValue(0);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const [docCategories, setDocCategories] = useState<DocumentCategory[]>([]);
   const [isLoading, setLoading] = useState(false);
   const isEditing = !!initialData;
-  const { control, handleSubmit, setValue, formState: { errors } } = useForm<DocumentFormData>({
+  const { control, handleSubmit, reset, setValue, formState: { errors } } = useForm<DocumentFormData>({
     resolver: zodResolver(documentSchema),
   });
 
   const onSubmit = async (data: DocumentFormData) => {
-      try {
-        console.log("Attempting document save...");
-        setLoading(true);
-  
-  
-        console.log("Document save Success for: ", data.documentName);
-      } catch (error: any) {
-        const errorMessage = error?.response?.data?.message 
-          || error?.message 
-          || 'An error occurred during document save';
-        console.error('Document save error:', errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
+        try {
+          setLoading(true);
+          const validatedData = documentSchema.parse(data);
+          if (isEditing) {
+            await documentApi.update(validatedData, carId, initialData.documentId);
+          } else {
+            await documentApi.register(validatedData, carId);
+          }
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Home' }],
+          });
+          onClose();
+        } catch (error: any) {
+          const errorMessage = error?.response?.data?.message 
+            || error?.message 
+            || 'An error occurred during document save';
+          console.error('Document save error:', errorMessage);
+        } finally {
+          setLoading(false);
+        }
+    };
 
   useEffect(() => {
+    const fetchDocumentCategories = async () => {
+      const data = await documentApi.getDocumentCategories();
+      setDocCategories(data);
+    };
     if (isVisible && initialData) {
-      setValue("documentName", initialData.name);
-      setValue("expiryDate", initialData.expiryDate);
+      reset({
+          documentCategoryId: initialData.documentCategoryId,
+          expiryDate: initialData.expiryDate,
+      });
+      fetchDocumentCategories();
+    } else if (isVisible) {
+      fetchDocumentCategories();
     }
-  }, [isVisible]);
+  }, [isVisible, initialData]);
 
   useAnimatedReaction(
     () => isVisible,
@@ -209,27 +234,26 @@ export default function AddDocuments({ isVisible, onClose, initialData }: Props)
           <View className="flex-1 px-5 pt-6 gap-5">
 
             {/* --- NUME DOCUMENT --- */}
-            <FormControl isInvalid={!!errors.documentName}>
-              <Controller
-                control={control}
-                name="documentName"
-                render={({ field: { onChange, value, onBlur } }) => (
-                  <FloatingInput
-                    label="Nume document"
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    isInvalid={!!errors.documentName}
-                    autoCapitalize="words"
-                  />
-                )}
-              />
-              <FormControlError>
-                <FormControlErrorText className="ml-2 mt-1 text-xs text-red-500">
-                  {errors.documentName?.message}
-                </FormControlErrorText>
-              </FormControlError>
-            </FormControl>
+            <FormControl isInvalid={!!errors.documentCategoryId} style={{ zIndex: 999 }}>
+                <Controller
+                  control={control}
+                  name="documentCategoryId"
+                  render={({ field: { onChange, value } }) => (
+                    <FloatingSelect
+                      label="Document"
+                      value={value}
+                      onValueChange={onChange}
+                      options={docCategories.map((d) => ({ label: d.name, value: d.id }))}
+                      isInvalid={!!errors.documentCategoryId}
+                    />
+                  )}
+                />
+                <FormControlError>
+                  <FormControlErrorText className="ml-2 mt-1 text-xs text-red-500">
+                    {errors.documentCategoryId?.message}
+                  </FormControlErrorText>
+                </FormControlError>
+              </FormControl>
 
             {/* --- DATA EXPIRARE --- */}
             <FormControl isInvalid={!!errors.expiryDate}>

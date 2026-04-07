@@ -23,12 +23,13 @@ type Document = {
 export default function AllDocumentsScreen() {
   const route = useRoute<RouteProp<RootStackParamList, "AllDocuments">>();
   const { documents } = route.params;
+  const { currentCarId } = route.params;
   const navigation = useNavigation();
   const [isSheetDocOpen, setIsSheetDocOpen] = useState(false);
-  const [editingDocData, setEditingDocData] = useState<{ name: string; expiryDate: Date } | null>(null);
+  const [editingDocData, setEditingDocData] = useState<{ documentCategoryId: number; expiryDate: Date; documentId: number } | null>(null);
   const theme = { backArrowColor: "#F97316" }; 
 
-  const handleEditDoc = (data: { name: string; expiryDate: Date }) => {
+  const handleEditDoc = (data: { documentCategoryId: number; expiryDate: Date; documentId: number }) => {
     setEditingDocData(data);
     setIsSheetDocOpen(true);
   };
@@ -75,6 +76,8 @@ export default function AllDocumentsScreen() {
           {documents.map((doc) => (
             <DocumentCard
               key={doc.id}
+              documentId={doc.id}
+              documentCategoryId={doc.documentCategoryId}
               icon={doc.documentCategoryIconName}
               library={doc.documentCategoryIconLibrary}
               iconBg="#e6eff5"
@@ -88,9 +91,10 @@ export default function AllDocumentsScreen() {
       </ScrollView>
 
       <AddDocuments
-        key={editingDocData ? `doc-${editingDocData.name}-${Date.now()}` : "doc-add"}
+        key={editingDocData ? `doc-${editingDocData.documentId}-${Date.now()}` : "doc-add"}
         isVisible={isSheetDocOpen}
         initialData={editingDocData}
+        carId={currentCarId}
         onClose={() => {
           setIsSheetDocOpen(false);
           setEditingDocData(null);

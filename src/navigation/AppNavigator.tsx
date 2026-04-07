@@ -23,7 +23,7 @@ export type RootStackParamList = {
   ForgotPassword: undefined;
   SignUp: undefined;
   UserDetails: undefined;
-  AllDocuments: { documents: Document[] };
+  AllDocuments: { documents: Document[], currentCarId: number };
   AllExpenses: undefined;
 };
 

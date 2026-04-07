@@ -66,10 +66,10 @@ const insertCarSchema = z.object({
   year: z.coerce.number().min(1886, "Year must be 1886 or later").max(new Date().getFullYear() + 1, `Year cannot be in the future`),
 });
 
-type InsertCarFormData = z.input<typeof insertCarSchema>;
+type CarFormData = z.input<typeof insertCarSchema>;
 
 export default function AddCar({ isVisible, onClose, initialData }: Props) {
-  const { control, handleSubmit, reset, watch, formState: { errors } } = useForm<InsertCarFormData>({
+  const { control, handleSubmit, reset, watch, formState: { errors } } = useForm<CarFormData>({
       resolver: zodResolver(insertCarSchema),
       defaultValues: {
         brandId: initialData?.brandId ?? '',
@@ -90,7 +90,7 @@ export default function AddCar({ isVisible, onClose, initialData }: Props) {
   const [isLoading, setLoading] = useState(false);
   const isEditing = !!initialData;
 
-  const onSubmit = async (data: InsertCarFormData) => {
+  const onSubmit = async (data: CarFormData) => {
       try {
         setLoading(true);
         const validatedData = insertCarSchema.parse(data);
