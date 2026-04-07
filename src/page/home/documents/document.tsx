@@ -14,9 +14,11 @@ import { VStack } from "@/components/ui/vstack";
 import AnimatedProgressBar from "@/src/utils/animatedProgressBar";
 import { HStack } from "@/components/ui/hstack";
 import { Box } from "@/components/ui/box";
+import DynamicIcon from "@/src/utils/dynamicIcon";
 
 export default function DocumentCard({
   icon,
+  library,
   iconBg,
   name,
   expiryDate,
@@ -26,6 +28,7 @@ export default function DocumentCard({
   onDelete,
 }: {
   icon: string;
+  library: string;
   iconBg: string;
   name: string;
   expiryDate: Date;
@@ -35,7 +38,6 @@ export default function DocumentCard({
   onDelete?: () => void;
 }) {
   const progress = totalDays - daysRemaining;
-  const progressWidth = useSharedValue(0);
   const pulse = useSharedValue(1);
 
   const swipeableRef = useRef<Swipeable>(null);
@@ -54,7 +56,6 @@ export default function DocumentCard({
   };
 
   useEffect(() => {
-    progressWidth.value = withTiming(progress, { duration: 800 });
 
     if (daysRemaining <= 3) {
       pulse.value = withRepeat(
@@ -67,10 +68,6 @@ export default function DocumentCard({
       );
     }
   }, []);
-
-  const animatedProgress = useAnimatedStyle(() => ({
-    width: `${progressWidth.value * 100}%`,
-  }));
 
   const animatedPulse = useAnimatedStyle(() => ({
     transform: [{ scale: pulse.value }],
@@ -160,16 +157,21 @@ export default function DocumentCard({
           <HStack className="items-center gap-3.5 px-4 pt-4 pb-2.5">
             <View
               style={{ backgroundColor: iconBg }}
-              className="w-12 h-12 rounded-2xl items-center justify-center"
+              className="w-12 h-12 rounded-xl items-center justify-center"
             >
-              <Text className="text-2xl">{icon}</Text>
+              <DynamicIcon 
+                library={library} 
+                name={icon}
+                size={24}
+                color="#3572d4"
+              />
             </View>
             <VStack className="flex-1 gap-0">
               <Text className="text-[15px] font-semibold text-gray-800">
                 {name}
               </Text>
               <Text className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
-                29 Mar 2026
+                {`${expiryDate.getDate().toString().padStart(2, "0")}/${(expiryDate.getMonth() + 1).toString().padStart(2, "0")}/${expiryDate.getFullYear()}`}
               </Text>
             </VStack>
 
@@ -193,7 +195,7 @@ export default function DocumentCard({
 
           {/* ── Progress bar ── */}
           <HStack className="items-center gap-2.5 px-4 pb-5">
-            <AnimatedProgressBar pct={progress} color={colors.progress} />
+            <AnimatedProgressBar pct={(progress / totalDays) * 100} color={colors.progress} />
           </HStack>
 
         </Box>

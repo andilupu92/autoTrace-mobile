@@ -30,7 +30,7 @@ export default function ExpensesChart() {
               <HStack className="items-center gap-3.5 pb-2.5">
                 <View
                   style={{ backgroundColor: item.iconBg }}
-                  className="w-12 h-12 rounded-2xl items-center justify-center"
+                  className="w-12 h-12 rounded-xl items-center justify-center"
                 >
                   <Text className="text-2xl">{item.icon}</Text>
                 </View>

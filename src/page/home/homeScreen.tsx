@@ -8,11 +8,23 @@ import CarsSection from "./cars/carsSection";
 import HeaderSection from "../../utils/headerSection";
 import DocumentCard from "./documents/document";
 import ExpensesChart from "./expenses/expensesChart";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import AddDocuments from "./documents/addDocuments";
 import Header from "./header";
 import AddCar from "./cars/addCar";
 import AddExpenses from "./expenses/addExpenses";
+import { documentApi } from "@/src/api/services/docService";
+import { ActivityIndicator } from "react-native";
+
+type Document = {
+  id: number;
+  documentCategoryId: number;
+  documentCategoryName: string;
+  expiryDate: string;
+  daysRemaining: number;
+  documentCategoryIconName: string;
+  documentCategoryIconLibrary: string;
+};
 
 export default function HomeScreen() {
   const [isSheetDocOpen, setIsSheetDocOpen] = useState(false);
@@ -21,6 +33,9 @@ export default function HomeScreen() {
   const [editingDocData, setEditingDocData] = useState<{ name: string; expiryDate: Date } | null>(null);
   const [editingCarData, setEditingCarData] = useState<{ id: number; brandId: number; brandName: string; modelId: number; modelName: string; kilometers: number; year: number } | null>(null);
   const [currentCarLogo, setCurrentCarLogo] = useState<string | null>(null);
+  const [currentCarId, setCurrentCarId] = useState<number | null>(null);
+const [documents, setDocuments] = useState<Document[]>([]);
+  const [loadingDocs, setLoadingDocs] = useState(false);
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
@@ -28,9 +43,28 @@ export default function HomeScreen() {
     navigation.navigate("UserDetails");
   };
 
-  const handleCarChange = useCallback((logoUrl: string) => {
+  const handleCarChange = useCallback((logoUrl: string, id: number) => {
     setCurrentCarLogo(logoUrl);
+    setCurrentCarId(id);
   }, []);
+
+  useEffect(() => {
+    if (currentCarId === null) return;
+
+    const fetchDocuments = async () => {
+      try {
+        setLoadingDocs(true);
+        const data = await documentApi.getDocuments(currentCarId);
+        setDocuments(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoadingDocs(false);
+      }
+    };
+
+    fetchDocuments();
+  }, [currentCarId]);
 
   const handleEditDoc = (data: { name: string; expiryDate: Date }) => {
     setEditingDocData(data);
@@ -68,9 +102,22 @@ export default function HomeScreen() {
               onAdd={() => setIsSheetDocOpen(true)}
             />
 
-            <DocumentCard icon="🚗" iconBg="#FFF3EB" name="RCA Insurance" daysRemaining={2} expiryDate={new Date("2026-03-18")} onEdit={handleEditDoc}/>
-            <DocumentCard icon="🔍" iconBg="#F0FDF4" name="ITP Inspection" daysRemaining={7} expiryDate={new Date("2026-03-21")} onEdit={handleEditDoc}/>
-            <DocumentCard icon="🛣️" iconBg="#FEF3C7" name="Road Tax" daysRemaining={24} expiryDate={new Date("2026-03-30")} onEdit={handleEditDoc}/>
+            {loadingDocs ? (
+              <ActivityIndicator size="small" color="#F97316" style={{ marginTop: 16 }} />
+            ) : (
+              documents.map((doc) => (
+                <DocumentCard
+                  key={doc.id}
+                  icon={doc.documentCategoryIconName}
+                  library={doc.documentCategoryIconLibrary}
+                  iconBg="#e6eff5"
+                  name={doc.documentCategoryName}
+                  daysRemaining={doc.daysRemaining}
+                  expiryDate={new Date(doc.expiryDate)}
+                  onEdit={handleEditDoc}
+                />
+              ))
+            )}
 
             <Pressable 
               onPress={handleViewAllDocuments}
