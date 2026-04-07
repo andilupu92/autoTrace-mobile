@@ -28,4 +28,9 @@ export const documentApi = {
         const response = await apiClient.put(`${API_URL}/documents/${carId}/${documentId}`, { ...credentials });
         return response.data;
     },
+
+    delete: async (documentId: number) => {
+        const response = await apiClient.delete(`${API_URL}/documents/${documentId}`);
+        return response.data;
+    }
 };

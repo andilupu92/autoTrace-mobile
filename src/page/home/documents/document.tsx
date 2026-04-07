@@ -15,6 +15,10 @@ import AnimatedProgressBar from "@/src/utils/animatedProgressBar";
 import { HStack } from "@/components/ui/hstack";
 import { Box } from "@/components/ui/box";
 import DynamicIcon from "@/src/utils/dynamicIcon";
+import { documentApi } from "@/src/api/services/docService";
+import { RootStackParamList } from "@/src/navigation/AppNavigator";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useNavigation } from "@react-navigation/native";
 
 export default function DocumentCard({
   documentCategoryId,
@@ -27,7 +31,6 @@ export default function DocumentCard({
   daysRemaining,
   totalDays = 30,
   onEdit,
-  onDelete,
 }: {
   documentCategoryId: number;
   documentId: number;
@@ -39,18 +42,18 @@ export default function DocumentCard({
   daysRemaining: number;
   totalDays?: number;
   onEdit?: (data: { documentCategoryId: number; expiryDate: Date; documentId: number }) => void;
-  onDelete?: () => void;
 }) {
   const progress = totalDays - daysRemaining;
   const pulse = useSharedValue(1);
 
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const swipeableRef = useRef<Swipeable>(null);
   const [menuVisible, setMenuVisible] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
   const kebabRef = useRef<View>(null);
 
   const openMenu = () => {
-    kebabRef.current?.measureInWindow((x, y, width, height) => {
+    kebabRef.current?.measureInWindow((y, height) => {
       setMenuPosition({
         top: y + height + 4,
         right: 16,
@@ -104,6 +107,22 @@ export default function DocumentCard({
         { text: "Delete", style: "destructive", onPress: onDelete },
       ]
     );
+  };
+
+  const onDelete = async () => {
+    try {
+      await documentApi.delete(documentId);
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Home' }],
+      });
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message
+        || error?.message
+        || 'An error occurred while deleting the document';
+      console.error('Document delete error:', errorMessage);
+      Alert.alert('Error', errorMessage);
+    }
   };
 
   const renderRightActions = () => (
