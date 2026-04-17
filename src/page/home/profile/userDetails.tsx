@@ -48,16 +48,8 @@ export default function UserDetailsScreen() {
       <View className="flex-1">
 
         {/* ── Header nou ── */}
-        <View className="bg-white px-5 pt-4 pb-6 rounded-b-[36px]"
-          style={{
-            borderBottomWidth: 1,
-            borderBottomColor: "#FEE2C8",
-            shadowColor: "#F97316",
-            shadowOffset: { width: 0, height: 6 },
-            shadowOpacity: 0.08,
-            shadowRadius: 16,
-            elevation: 4,
-          }}
+        <View className="px-6 pt-5"
+
         >
           {/* Close button */}
           <View className="flex-row justify-end mb-4">
@@ -147,7 +139,7 @@ export default function UserDetailsScreen() {
         {/* ── Meniu ── */}
         <ScrollView
           className="flex-1"
-          contentContainerClassName="px-5 pb-12"
+          contentContainerClassName="px-6 pb-12"
           showsVerticalScrollIndicator={false}
         >
           <SectionLabel label="Account" />

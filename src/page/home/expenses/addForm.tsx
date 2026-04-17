@@ -8,13 +8,8 @@ function todayISO(): string {
   return new Date().toISOString().split("T")[0];
 }
 
-function formatDateNice(iso: string): string {
-  const d = new Date(iso);
-  const months = ["Ian","Feb","Mar","Apr","Mai","Iun","Iul","Aug","Sep","Oct","Nov","Dec"];
-  return `${String(d.getDate()).padStart(2, "0")} ${months[d.getMonth()]} ${d.getFullYear()}`;
-}
-
 interface Transaction {
+  id: number;
   name: string;
   date: string;
   amount: number;
@@ -43,8 +38,9 @@ export default function AddForm({ accentColor, onAdd, onCancel }: AddFormProps) 
     }
  
     onAdd({
+      id: 0,
       name: name.trim(),
-      date: formatDateNice(date),
+      date: date,
       amount: Number(amount),
     });
  
@@ -64,7 +60,7 @@ export default function AddForm({ accentColor, onAdd, onCancel }: AddFormProps) 
         }`}
       >
         <InputField
-          placeholder="Denumire (ex: Rompetrol)"
+          placeholder="Denumire cheltuială"
           value={name}
           onChangeText={(v) => {
             setName(v);

@@ -1,10 +1,12 @@
+import DynamicIcon from "@/src/utils/dynamicIcon";
 import { View, Text } from "react-native";
-import Svg, { Rect, Text as SvgText, G } from "react-native-svg";
+import Svg, { Rect } from "react-native-svg";
 
 type Category = {
-  name: string;
-  icon: string;
-  budgetPct: number;
+  expenseCategoryIconLibrary: string;
+  expenseCategoryName: string;
+  expenseCategoryIconName: string;
+  percentage: number;
 };
 
 type Props = {
@@ -13,91 +15,13 @@ type Props = {
   categories: Category[];
 };
 
-// ─── Mini bar chart ───────────────────────────────────────────────────────────
-function CategoryBarChart({ categories }: { categories: Category[] }) {
-  const WIDTH   = 320;
-  const BAR_H   = 16;
-  const GAP     = 14;
-  const LABEL_W = 108;
-  const BAR_MAX = WIDTH - LABEL_W - 44;
-  const HEIGHT  = categories.length * (BAR_H + GAP);
-
-  return (
-    <Svg width="100%" height={HEIGHT} viewBox={`0 0 ${WIDTH} ${HEIGHT}`}>
-      {categories.map((cat, i) => {
-        const y    = i * (BAR_H + GAP);
-        const barW = Math.max(6, (cat.budgetPct / 100) * BAR_MAX);
-
-        const barColor =
-          cat.budgetPct >= 80 ? "#EF4444"
-          : cat.budgetPct >= 50 ? "#F97316"
-          : "#22C55E";
-
-        const pctColor =
-          cat.budgetPct >= 80 ? "#EF4444"
-          : cat.budgetPct >= 50 ? "#F97316"
-          : "#16A34A";
-
-        return (
-          <G key={cat.name}>
-            {/* Label */}
-            <SvgText
-              x={0}
-              y={y + BAR_H - 3}
-              fontSize={11}
-              fontWeight="600"
-              fill="#475569"
-            >
-              {cat.icon} {cat.name.length > 11 ? cat.name.slice(0, 11) + "…" : cat.name}
-            </SvgText>
-
-            {/* Track */}
-            <Rect
-              x={LABEL_W}
-              y={y}
-              width={BAR_MAX}
-              height={BAR_H}
-              rx={BAR_H / 2}
-              fill="#F1F5F9"
-            />
-
-            {/* Bar */}
-            <Rect
-              x={LABEL_W}
-              y={y}
-              width={barW}
-              height={BAR_H}
-              rx={BAR_H / 2}
-              fill={barColor}
-              opacity={0.85}
-            />
-
-            {/* Procent */}
-            <SvgText
-              x={LABEL_W + BAR_MAX + 6}
-              y={y + BAR_H - 3}
-              fontSize={10}
-              fontWeight="700"
-              fill={pctColor}
-            >
-              {cat.budgetPct}%
-            </SvgText>
-          </G>
-        );
-      })}
-    </Svg>
-  );
-}
-
-// ─── Card principal ───────────────────────────────────────────────────────────
 export default function ExpenseSummaryCard({ totalAmount, currentMonth, categories }: Props) {
-  const overBudget = categories.filter((c) => c.budgetPct >= 80);
-  const warning    = categories.filter((c) => c.budgetPct >= 50 && c.budgetPct < 80);
+  const overBudget = categories.filter((c) => c.percentage >= 80);
+  const warning    = categories.filter((c) => c.percentage >= 50 && c.percentage < 80);
 
   return (
     <View className="mb-6 flex-col gap-3">
 
-      {/* ── Card principal: sumar ── */}
       <View
         className="bg-white rounded-2xl px-4 py-4"
         style={{
@@ -169,8 +93,14 @@ export default function ExpenseSummaryCard({ totalAmount, currentMonth, categori
                 : `${overBudget.length} categorii au depășit 80% din buget!`}
             </Text>
             {overBudget.map((c) => (
-              <Text key={c.name} className="text-red-500 text-xs">
-                • {c.icon} {c.name} — {c.budgetPct}%
+              <Text key={c.expenseCategoryName} className="text-red-500 text-xs">
+                • <DynamicIcon
+                    library={c.expenseCategoryIconLibrary}
+                    name={c.expenseCategoryIconName}
+                    size={10}
+                    color="#3572d4"
+                  /> 
+                  {" "}{c.expenseCategoryName} — {c.percentage}%
               </Text>
             ))}
           </View>
@@ -191,14 +121,78 @@ export default function ExpenseSummaryCard({ totalAmount, currentMonth, categori
                 : `${warning.length} categorii au depășit jumătate din buget.`}
             </Text>
             {warning.map((c) => (
-              <Text key={c.name} className="text-orange-500 text-xs">
-                • {c.icon} {c.name} — {c.budgetPct}%
+              <Text key={c.expenseCategoryName} className="text-orange-500 text-xs">
+                • <DynamicIcon
+                    library={c.expenseCategoryIconLibrary}
+                    name={c.expenseCategoryIconName}
+                    size={10}
+                    color="#3572d4"
+                  /> 
+                  {" "}{c.expenseCategoryName} — {c.percentage}%
               </Text>
             ))}
           </View>
         </View>
       )}
 
+    </View>
+  );
+}
+
+function CategoryBarChart({ categories }: { categories: Category[] }) {
+  const WIDTH   = 350;
+  const BAR_H   = 10;
+  const LABEL_W = 128;
+  const BAR_MAX = WIDTH - LABEL_W - 44;
+
+  return (
+    <View>
+      {categories.map((cat, i) => {
+        const barW = Math.max(6, (cat.percentage / 100) * BAR_MAX);
+
+        const barColor =
+          cat.percentage >= 80 ? "#EF4444"
+          : cat.percentage >= 50 ? "#F97316"
+          : "#22C55E";
+
+        const pctColor =
+          cat.percentage >= 80 ? "#EF4444"
+          : cat.percentage >= 50 ? "#F97316"
+          : "#16A34A";
+
+        return (
+          <View
+            key={cat.expenseCategoryName}
+            style={{ flexDirection: "row", alignItems: "center", marginBottom: 10 }}
+          >
+            {/* Icon + Name */}
+            <View style={{ flexDirection: "row", alignItems: "center", width: LABEL_W }}>
+              <DynamicIcon
+                library={cat.expenseCategoryIconLibrary}
+                name={cat.expenseCategoryIconName}
+                size={10}
+                color="#3572d4"
+              />
+              <Text style={{ marginLeft: 5, fontSize: 12, fontWeight: "600", color: "#475569" }}>
+                {cat.expenseCategoryName.length > 15
+                  ? cat.expenseCategoryName.slice(0, 15) + "…"
+                  : cat.expenseCategoryName}
+              </Text>
+            </View>
+
+            {/* Bara */}
+            <Svg width={BAR_MAX} height={BAR_H}>
+              <Rect x={0} y={0} width={BAR_MAX} height={BAR_H} rx={BAR_H / 2} fill="#F1F5F9" />
+              <Rect x={0} y={0} width={barW} height={BAR_H} rx={BAR_H / 2} fill={barColor} opacity={0.85} />
+            </Svg>
+
+            {/* Procent */}
+            <Text style={{ marginLeft: 10, fontSize: 10, fontWeight: "700", color: pctColor }}>
+              {cat.percentage}%
+            </Text>
+          </View>
+        );
+      })}
     </View>
   );
 }

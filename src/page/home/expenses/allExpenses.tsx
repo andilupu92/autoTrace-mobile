@@ -5,49 +5,57 @@ import { Ionicons } from "@expo/vector-icons";
 import { VStack } from "@/components/ui/vstack";
 import ExpenseCategory from "./expenseCategory";
 import ExpenseSummaryCard from "./expenseSummary";
+import { useEffect, useState } from "react";
+import { documentApi } from '@/src/api/services/docService';
+import formatCurrency from "@/src/utils/formatCurrency";
+import { RootStackParamList } from "@/src/navigation/AppNavigator";
+import { useRoute, RouteProp } from "@react-navigation/native";
+import monthCurrent from "@/src/utils/monthCurrent";
+
+type ExpenseItem = {
+  expenseCategoryId: number;
+  expenseCategoryName: string;
+  expenseCategoryIconName: string;
+  expenseCategoryIconLibrary: string;
+  totalSum: number;
+  percentage: number;
+  ExpenseTransactions: ExpenseTransaction[];
+};
+
+type ExpenseTransaction = {
+  id: number;
+  name: string;
+  amount: number;
+  date: string;
+}
 
 export default function AllExpensesScreen() {
+  const route = useRoute<RouteProp<RootStackParamList, "AllExpenses">>();
+  const { carId } = route.params;
   const navigation = useNavigation();
   const theme = { backArrowColor: "#F97316" };
+  const [loading, setLoading] = useState(false);
+  const [expenses, setExpenses] = useState<ExpenseItem[]>([]);
+  const [totalExpenses, setTotalExpenses] = useState(0);
 
-  const totalAmount = "2.650 RON";
-  const currentMonth = "MARTIE 2025";
+  const currentMonth = monthCurrent(new Date());
 
-  const CATEGORIES = [
-    {
-      rank: 1, icon: "⛽", iconBg: "#FFF3EB", name: "Combustibil",
-      budgetPct: 85, barColor: "#F97316", pctColor: "#F97316",
-      initialTransactions: [
-        { name: "Benzinărie MOL",    date: "10 Mar 2025", amount: 400 },
-        { name: "Benzinărie Petrom", date: "22 Feb 2025", amount: 450 },
-        { name: "Benzinărie OMV",    date: "05 Feb 2025", amount: 350 },
-      ],
-    },
-    {
-      rank: 2, icon: "🔧", iconBg: "#F3F4F6", name: "Service & Piese",
-      budgetPct: 53, barColor: "#9CA3AF", pctColor: "#6B7280",
-      initialTransactions: [
-        { name: "Auto Total Service",  date: "15 Mar 2025", amount: 250 },
-        { name: "Piese Auto Dedeman",  date: "01 Mar 2025", amount: 200 },
-      ],
-    },
-    {
-      rank: 3, icon: "🚿", iconBg: "#EFF6FF", name: "Spălătorie",
-      budgetPct: 15, barColor: "#C4CBDA", pctColor: "#6B7280",
-      initialTransactions: [
-        { name: "Spălătorie Auto Plus", date: "08 Mar 2025", amount: 70 },
-        { name: "Car Wash Express",     date: "20 Feb 2025", amount: 50 },
-      ],
-    },
-    {
-      rank: 4, icon: "🅿️", iconBg: "#ECFDF5", name: "Parcare",
-      budgetPct: 10, barColor: "#10B981", pctColor: "#10B981",
-      initialTransactions: [
-        { name: "Parcare Palas Mall", date: "12 Mar 2025", amount: 40 },
-        { name: "Parcare Centru",     date: "03 Mar 2025", amount: 40 },
-      ],
-    },
-  ];
+  useEffect(() => {
+      if (carId === null) return;
+      const fetchExpenses = async () => {
+        try {
+          setLoading(true);
+            const expensesData = await documentApi.getExpenses(carId, new Date().getFullYear(), new Date().getMonth() + 1);
+            setExpenses(expensesData);
+            setTotalExpenses(expensesData.reduce((sum: number, item: ExpenseItem) => sum + item.totalSum, 0));
+          } catch (error) {
+            console.error(error);
+          } finally {
+            setLoading(false);
+          }
+        };
+      fetchExpenses();          
+    }, [carId]);
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
@@ -79,14 +87,14 @@ export default function AllExpensesScreen() {
       >
 
         <ExpenseSummaryCard
-          totalAmount={totalAmount}
+          totalAmount={formatCurrency(totalExpenses)}
           currentMonth={currentMonth}
-          categories={CATEGORIES}
+          categories={expenses}
         />
 
         <VStack className="mt-5 gap-3">
-          {CATEGORIES.map((cat) => (
-            <ExpenseCategory key={cat.rank} {...cat} />
+          {expenses.map((cat) => (
+            <ExpenseCategory key={cat.expenseCategoryId} {...cat} />
           ))}
         </VStack>
 

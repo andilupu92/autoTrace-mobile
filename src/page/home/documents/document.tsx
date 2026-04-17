@@ -19,6 +19,7 @@ import { documentApi } from "@/src/api/services/docService";
 import { RootStackParamList } from "@/src/navigation/AppNavigator";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
+import formatDate from "@/src/utils/formatDate";
 
 export default function DocumentCard({
   documentCategoryId,
@@ -194,7 +195,7 @@ export default function DocumentCard({
                 {name}
               </Text>
               <Text className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
-                {`${expiryDate.getDate().toString().padStart(2, "0")}/${(expiryDate.getMonth() + 1).toString().padStart(2, "0")}/${expiryDate.getFullYear()}`}
+                {formatDate(expiryDate.toString())}
               </Text>
             </VStack>
 

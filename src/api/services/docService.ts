@@ -32,5 +32,10 @@ export const documentApi = {
     delete: async (documentId: number) => {
         const response = await apiClient.delete(`${API_URL}/documents/${documentId}`);
         return response.data;
+    },
+
+    getExpenses: async (carId: number, year: number, month: number) => {
+        const response = await apiClient.get(`${API_URL}/expenses/${carId}/${year}/${month}`);
+        return response.data;
     }
 };

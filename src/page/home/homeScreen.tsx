@@ -105,7 +105,7 @@ export default function HomeScreen() {
             {loadingDocs ? (
               <ActivityIndicator size="small" color="#F97316" style={{ marginTop: 16 }} />
             ) : (
-              documents.map((doc) => (
+              documents.slice(0, 3).map((doc) => (
                 <DocumentCard
                   key={doc.id}
                   documentId={doc.id}
@@ -120,15 +120,19 @@ export default function HomeScreen() {
                 />
               ))
             )}
-            {documents.length > 0 && !loadingDocs && (
+            {documents.length > 0 && !loadingDocs ? (
               <Pressable 
                 onPress={handleViewAllDocuments}
-                className="mt-4 bg-white py-2 px-6 rounded-full self-center shadow-sm flex-row items-center justify-center border border-gray-100"
+                className="mt-4 bg-white py-2 px-6 rounded-full self-center flex-row items-center justify-center border border-gray-100"
               >
                 <Text className="text-orange-500 font-medium text-sm">
                   Vezi toate documentele
                 </Text>
               </Pressable>
+            ) : (
+              <Text className="text-gray-400 italic text-center mt-4">
+                Nu există documente pentru această mașină.
+              </Text>
             )}
           </View>
         </View>
@@ -138,7 +142,7 @@ export default function HomeScreen() {
             name="My Expenses"
             onAdd={() => setIsSheetExpensesOpen(true)}
           />
-          <ExpensesChart />
+          <ExpensesChart carId={currentCarId} />
         </View>
       </ScrollView>
 

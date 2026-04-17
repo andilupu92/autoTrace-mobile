@@ -24,7 +24,7 @@ export type RootStackParamList = {
   SignUp: undefined;
   UserDetails: undefined;
   AllDocuments: { documents: Document[], currentCarId: number };
-  AllExpenses: undefined;
+  AllExpenses: { carId: number };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
