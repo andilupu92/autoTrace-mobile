@@ -3,7 +3,7 @@
   "compilerOptions": {
     "strict": true,
     "jsxImportSource": "nativewind",
-    "types": ["nativewind/types"],
+    "types": ["nativewind/types", "jest"],
     "paths": {
       "@/*": ["./*"],
       "tailwind.config": ["./tailwind.config.js"]
