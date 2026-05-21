@@ -8,6 +8,7 @@ import type { RootStackParamList } from '@/src/navigation/AppNavigator';
 import { useNavigation } from '@react-navigation/native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Box } from '@/components/ui/box';
+import { useAuthStore } from '@/src/store/authStore';
 
 export default function ProfileScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -51,7 +52,7 @@ export default function ProfileScreen() {
           className={`flex-1 ${isDark ? 'bg-background-primary-900' : 'bg-background-primary-100'} px-6 py-2 gap-4`}
         >
           <View
-            className={`${isDark ? 'bg-background-icon-900' : 'bg-background-icon-100'} self-center w-32 h-32 rounded-full items-center justify-center mb-5`}
+            className={`${isDark ? 'bg-background-icon-900' : 'bg-background-icon-100'} self-center w-32 h-32 rounded-full items-center justify-center mb-3`}
           >
             <Icons.CircleUser
               className={`${isDark ? 'text-typography-800' : 'text-typography-200'}`}
@@ -61,9 +62,11 @@ export default function ProfileScreen() {
           </View>
 
           <View
-            className={`${isDark ? 'text-typography-800' : 'text-typography-200'} font-inter-medium text-sm items-center justify-center`}
+            className="font-inter-medium text-sm items-center justify-center mb-2"
           >
-            <Text className="italic">andilupu92@gmail.com</Text>
+            <Text className={`${isDark ? 'text-typography-800' : 'text-typography-200'} italic`}>
+              {useAuthStore.getState().user?.email}
+            </Text>
           </View>
 
           <View

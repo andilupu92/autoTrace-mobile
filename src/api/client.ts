@@ -7,27 +7,22 @@ import Constants from 'expo-constants';
 const getBaseUrl = () => {
   const hostUri = Constants.expoConfig?.hostUri;
 
-  // for web, we can just use localhost
   if (!hostUri) {
     return 'http://localhost:8080';
   }
 
   const ip = hostUri.split(':')[0];
-
-  // For mobile, we need to use the IP address of the machine running the server
   return `http://${ip}:8080`;
 };
 
-// Create a single instance to use everywhere
 const apiClient = axios.create({
   baseURL: getBaseUrl(),
-  timeout: 10000, // Abort request if it takes more than 10 seconds
+  timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Flag to prevent multiple refresh token requests
 let isRefreshing = false;
 let failedQueue: Array<{
   resolve: (value?: any) => void;
@@ -46,11 +41,14 @@ const processQueue = (error: AxiosError | null, token: string | null = null) => 
   failedQueue = [];
 };
 
-// Request interceptor - Add access token to requests
+// public routes that don't require auth token
+const PUBLIC_ROUTES = ['/auth/login', '/auth/refresh', '/auth/register'];
+const checkIsPublicRoute = (url?: string) => PUBLIC_ROUTES.some((route) => url?.endsWith(route));
+
+// Request interceptor
 apiClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
-    const publicRoutes = ['/auth/login', '/auth/refresh', '/auth/register'];
-    const isPublicRoute = publicRoutes.some((route) => config.url?.endsWith(route));
+    const isPublicRoute = checkIsPublicRoute(config.url);
     const { accessToken } = useAuthStore.getState();
 
     if (accessToken && config.headers && !isPublicRoute) {
@@ -59,25 +57,28 @@ apiClient.interceptors.request.use(
 
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  },
+  (error) => Promise.reject(error),
 );
 
 // Response interceptor - Handle token refresh
 apiClient.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;
     };
 
-    // If error is 401 and we haven't retried yet
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (!originalRequest) {
+      return Promise.reject(error);
+    }
+
+    const isPublicRoute = checkIsPublicRoute(originalRequest.url);
+
+    // 1. check if error is 401, request hasn't been retried yet, and it's not a public route
+    if (error.response?.status === 401 && !originalRequest._retry && !isPublicRoute) {
+      
       if (isRefreshing) {
-        // If already refreshing, queue this request
+        // if we're already refreshing, queue the request and return a promise that resolves once the token is refreshed
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
@@ -87,46 +88,41 @@ apiClient.interceptors.response.use(
             }
             return apiClient(originalRequest);
           })
-          .catch((err) => {
-            return Promise.reject(err);
-          });
+          .catch((err) => Promise.reject(err));
       }
 
       originalRequest._retry = true;
       isRefreshing = true;
 
-      const refreshToken = await secureStorage.getRefreshToken();
-
-      if (!refreshToken) {
-        // No refresh token available, logout
-        useAuthStore.getState().logout();
-        return Promise.reject(error);
-      }
-
       try {
-        // Call refresh token endpoint
+        const refreshToken = await secureStorage.getRefreshToken();
+
+        if (!refreshToken) {
+          useAuthStore.getState().logout();
+          return Promise.reject(error);
+        }
+
         const BASE_URL = getBaseUrl();
         const response = await axios.post(`${BASE_URL}/auth/refresh`, {
           refreshToken,
         });
 
-        const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data;
+        const newAccessToken = response.data.newAccessToken;
+        const newRefreshToken = response.data.newRefreshToken;
 
-        // Update tokens in store and secure storage
         await secureStorage.saveTokens(newAccessToken, newRefreshToken);
         useAuthStore.getState().setTokens(newAccessToken, newRefreshToken);
 
-        // Process queued requests
-        processQueue(null, newAccessToken);
-
-        // Retry original request with new token
         if (originalRequest.headers) {
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         }
 
+        // clear the queue with the new token
+        processQueue(null, newAccessToken);
+
         return apiClient(originalRequest);
       } catch (refreshError) {
-        // Refresh token failed, logout user
+        // If the refresh fails (e.g., refresh token expired), clear the queue and log out
         processQueue(refreshError as AxiosError, null);
         useAuthStore.getState().logout();
         return Promise.reject(refreshError);
