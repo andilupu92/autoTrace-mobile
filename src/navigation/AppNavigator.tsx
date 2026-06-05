@@ -23,6 +23,8 @@ import BugReportScreen from '../page/profile/bugReport';
 import FeedbackScreen from '../page/profile/feedback';
 import ContactUsScreen from '../page/profile/contactUs';
 import AboutAppScreen from '../page/profile/aboutApp';
+import VerifyOTPScreen from '../page/auth/verifyOTP';
+import ResetPasswordScreen from '../page/auth/resetPassword';
 
 type Car = {
   id: number;
@@ -77,7 +79,6 @@ type ExpenseHistory = {
 export type RootStackParamList = {
   Login: undefined;
   Home: undefined;
-  ForgotPassword: undefined;
   SignUp: undefined;
   AddCar: undefined;
   AddDocument: { car: CarItem; cars: Car[]; document?: Document };
@@ -99,6 +100,9 @@ export type RootStackParamList = {
   FeedbackScreen: undefined;
   ContactUsScreen: undefined;
   AboutAppScreen: undefined;
+  ForgotPassword: undefined;
+  VerifyOTP: { email: string };
+  ResetPassword: { email: string; otpCode: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -152,6 +156,8 @@ export default function AppNavigator() {
       <Stack.Screen name="FeedbackScreen" component={FeedbackScreen} options={{ headerShown: false }} />
       <Stack.Screen name="ContactUsScreen" component={ContactUsScreen} options={{ headerShown: false }} />
       <Stack.Screen name="AboutAppScreen" component={AboutAppScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="VerifyOTP" component={VerifyOTPScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} options={{ headerShown: false }} />
       {/*</>
         )}*/}
     </Stack.Navigator>

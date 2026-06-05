@@ -31,5 +31,20 @@ export const authApi = {
   deleteAccount: async () => {
     const response = await apiClient.delete(`${API_URL}/delete`);
     return response.data;
+  },
+
+  forgotPassword: async (email: string) => {
+    const response = await apiClient.post(`${API_URL}/forgot-password`, { email });
+    return response.data;
+  },
+
+  verifyOtp: async (email: string, otpCode: string) => {
+    const response = await apiClient.post(`${API_URL}/verify-otp`, { email, otpCode });
+    return response.data;
+  },
+
+  resetPassword: async (email: string, otpCode: string, newPassword: string) => {
+    const response = await apiClient.post(`${API_URL}/reset-password`, { email, otpCode, newPassword });
+    return response.data;
   }
 };
